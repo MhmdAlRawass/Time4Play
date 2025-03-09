@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:time4play/providers/country_provider.dart';
-import 'package:time4play/screens/login_screen.dart';
+// import 'package:time4play/screens/login_screen.dart';
+import 'package:time4play/screens/main_screen.dart';
 
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
   useMaterial3: true,
   primaryColor: const Color(0xFF0D47A1),
-  scaffoldBackgroundColor: const Color(0xFF121212),
+  // scaffoldBackgroundColor: const Color(0xFF121212),
   // scaffoldBackgroundColor: const Color(0xFF031024),
+  scaffoldBackgroundColor: const Color(0xFF0F172A),
   cardColor: const Color(0xFF1E1E1E),
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF0D47A1),
+    // backgroundColor: Color(0xFF0D47A1),
+    backgroundColor: Color(0xFF0F172A),
   ),
   textTheme: const TextTheme(
     headlineLarge: TextStyle(
@@ -68,7 +71,7 @@ class MyApp extends StatelessWidget {
       title: 'Time4Play',
       debugShowCheckedModeBanner: false,
       theme: darkTheme,
-      home: const LoginScreen(),
+      home: const MainScreen(),
     );
   }
 }

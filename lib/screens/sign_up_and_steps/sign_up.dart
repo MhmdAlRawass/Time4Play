@@ -176,8 +176,9 @@ class _SignUpScreenState extends State<SignUpScreen>
       controller: _emailController,
       validator: (value) {
         if (value == null || value.isEmpty) return "Please enter your email";
-        if (!EmailValidator.validate(value))
+        if (!EmailValidator.validate(value)) {
           return "Please enter a valid email";
+        }
         return null;
       },
       decoration: _inputDecoration(
@@ -213,8 +214,9 @@ class _SignUpScreenState extends State<SignUpScreen>
     return TextFormField(
       controller: _confirmPasswordController,
       validator: (value) {
-        if (value == null || value.isEmpty)
+        if (value == null || value.isEmpty) {
           return "Please confirm your password";
+        }
         if (value != _passwordController.text) return "Passwords do not match";
         return null;
       },

@@ -1,115 +1,239 @@
 import 'package:flutter/material.dart';
-/// BookingsPage: Displays a list of bookings with animated fade-in effect.
-/// Each booking is shown in a card with a "View" button.
-class BookingsPage extends StatefulWidget {
-  const BookingsPage({super.key});
+import 'package:time4play/widgets/booking/available_court_card.dart';
+import 'dart:io' show Platform;
+import 'package:time4play/widgets/booking/date_card.dart';
+import 'package:time4play/widgets/booking/session_duration.dart';
+import 'package:time4play/widgets/booking/time_slot_card.dart';
+
+class BookingPage extends StatefulWidget {
+  const BookingPage({super.key});
 
   @override
-  State<BookingsPage> createState() => _BookingsPageState();
+  State<BookingPage> createState() => _BookingPageState();
 }
 
-class _BookingsPageState extends State<BookingsPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _bookingsController;
-  late Animation<double> _bookingsFadeAnimation;
+class _BookingPageState extends State<BookingPage> {
+  final textStyle = const TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.bold,
+  );
 
-  @override
-  void initState() {
-    super.initState();
-    _bookingsController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-    _bookingsFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _bookingsController, curve: Curves.easeIn),
-    );
-    _bookingsController.forward();
-  }
+  bool _isExpanded = false;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _expandedKey = GlobalKey();
 
   @override
   void dispose() {
-    _bookingsController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  // Sample booking data
-  final List<Map<String, String>> bookings = const [
-    {"title": "Tennis Court", "date": "Today, 4 PM", "location": "Court 1"},
-    {
-      "title": "Football Field",
-      "date": "Tomorrow, 3 PM",
-      "location": "Field A"
-    },
-    {
-      "title": "Basketball Court",
-      "date": "Friday, 6 PM",
-      "location": "Court 2"
-    },
-    {
-      "title": "Swimming Pool",
-      "date": "Next Monday, 10 AM",
-      "location": "Pool X"
-    },
-  ];
+  void _toggleExpanded() {
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isExpanded) {
+        if (_expandedKey.currentContext != null) {
+          Scrollable.ensureVisible(
+            _expandedKey.currentContext!,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      } else {
+        _scrollController.animateTo(
+          0.0,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: FadeTransition(
-        opacity: _bookingsFadeAnimation,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Your Bookings",
-                style: Theme.of(context).textTheme.headlineLarge,
+    return Scaffold(
+      appBar: _buildAppBar(context),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.all(16),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor.withOpacity(0.4),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
               ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    final booking = bookings[index];
-                    return Card(
-                      color: Theme.of(context).cardColor,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          booking["title"]!,
-                          style: Theme.of(context).textTheme.headlineSmall,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Dates',
+                  style: textStyle,
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 100,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 10,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: DateCard(
+                          date: DateTime.now().add(Duration(days: index)),
                         ),
-                        subtitle: Text(
-                          "${booking["date"]!} - ${booking["location"]!}",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        trailing: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Theme.of(context).primaryColor,
-                          ),
-                          onPressed: () {
-                            // Consider using a Hero widget for detailed view transitions.
-                          },
-                          child: Text(
-                            "View",
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  height: 1,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Session Duration',
+                  style: textStyle,
+                ),
+                const SizedBox(height: 12),
+                SessionDuration(),
+                const SizedBox(height: 12),
+                Text(
+                  'Starting Time',
+                  style: textStyle,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 6.0,
+                  children: List.generate(32, (index) {
+                    return GestureDetector(
+                      onTap: _toggleExpanded,
+                      child: TimeSlotCard(
+                        date: DateTime.now().add(
+                          Duration(hours: index + 10),
                         ),
                       ),
                     );
-                  },
+                  }),
                 ),
-              ),
-            ],
+                if (_isExpanded) const SizedBox(height: 18),
+                if (_isExpanded)
+                  // The key here identifies the expanded section.
+                  Container(
+                    key: _expandedKey,
+                    width: double.infinity,
+                    height: 1,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                if (_isExpanded) const SizedBox(height: 12),
+                if (_isExpanded)
+                  Text(
+                    'Available Courts',
+                    style: textStyle,
+                  ),
+                if (_isExpanded) const SizedBox(height: 12),
+                if (_isExpanded) const AvailableCourtCard(),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+PreferredSizeWidget _buildAppBar(BuildContext context) {
+  return PreferredSize(
+    preferredSize: Size(double.infinity, 200),
+    child: Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('lib/assets/basketball.jpeg'),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 42,
+          left: 8,
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            icon: Icon(
+              Platform.isIOS ? Icons.arrow_back_ios_new : Icons.arrow_back,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius: BorderRadius.circular(12).copyWith(
+                bottomLeft: Radius.circular(0),
+                bottomRight: Radius.circular(0),
+              ),
+            ),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'The Padelist - Zalka',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                    Text(
+                      'Zalka, Lebanon',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                      textAlign: TextAlign.left,
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                IconButton.filled(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStatePropertyAll(
+                        Theme.of(context).colorScheme.primary),
+                  ),
+                  onPressed: () {},
+                  icon: const Icon(Icons.location_on_outlined),
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    ),
+  );
 }

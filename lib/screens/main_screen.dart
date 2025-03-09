@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
-import 'package:time4play/main2.dart';
-import 'package:time4play/screens/booking.dart';
+import 'package:time4play/screens/venues.dart';
 import 'package:time4play/screens/home.dart';
 import 'package:time4play/screens/settings.dart';
+import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,16 +15,17 @@ class _MainScreenState extends State<MainScreen> {
   int _pageIndex = 0;
   final _pages = <Widget>[
     HomeScreen(),
-    BookingsPage(),
+    VenuesPage(),
     SettingsPage(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      // ),
+      // drawer: Drawer(),
       body: _pages[_pageIndex],
       bottomNavigationBar: SalomonBottomBar(
         currentIndex: _pageIndex,
