@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'book_history_screen.dart';
-import 'explore_screen.dart';
-import '../widgets/home/booking_card.dart';
 import '../widgets/home/section_header.dart';
 import '../widgets/home/sport_category_button.dart';
 import '../widgets/home/featured_card.dart';
 import '../widgets/home/promotion_card.dart';
 import '../widgets/home/review_card.dart';
-import '../widgets/home/how_it_works_section.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    required this.switchScreen,
+  });
+
+  final void Function(int) switchScreen;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -38,13 +40,6 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _navigateToExplore(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ExploreScreen()),
-    );
   }
 
   void _navigateToBookings(BuildContext context) {
@@ -78,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _buildDrawer(context),
       // You can later add a custom drawer implementation here if needed.
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -92,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
                   fit: StackFit.expand,
                   children: [
                     Image.asset(
-                      'lib/assets/basketball.jpeg',
+                      'lib/assets/images/home/hero.jpg',
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) =>
                           const Placeholder(),
@@ -119,15 +115,18 @@ class _HomeScreenState extends State<HomeScreen>
                             "Find & Book the Best\nSports Venues Near You!",
                             style: Theme.of(context)
                                 .textTheme
-                                .displaySmall
+                                .headlineLarge
                                 ?.copyWith(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 36,
                                 ),
                           ),
                           const SizedBox(height: 20),
                           ElevatedButton(
-                            onPressed: () => _navigateToExplore(context),
+                            onPressed: () {
+                              widget.switchScreen(1);
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
                                   Theme.of(context).scaffoldBackgroundColor,
@@ -137,10 +136,21 @@ class _HomeScreenState extends State<HomeScreen>
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: Text(
-                              "Find a Venue",
-                              style: TextStyle(
-                                fontSize: 18,
+                            child: ShaderMask(
+                              shaderCallback: (bounds) => LinearGradient(
+                                colors: [
+                                  Colors.redAccent,
+                                  const Color.fromARGB(255, 33, 40, 243),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ).createShader(bounds),
+                              child: Text(
+                                "Find a Venue",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -148,13 +158,14 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ),
                     Positioned(
-                      top: 46,
-                      left: 10,
+                      top: 56,
+                      right: 16,
                       child: IconButton(
                         onPressed: () {
                           // Insert logic for opening your manual drawer
+                          Scaffold.of(context).openDrawer();
                         },
-                        icon: const Icon(Icons.menu),
+                        icon: const Icon(Icons.notifications_outlined),
                         iconSize: 30,
                       ),
                     )
@@ -170,29 +181,7 @@ class _HomeScreenState extends State<HomeScreen>
                 child: Column(
                   children: [
                     // Upcoming Bookings
-                    Column(
-                      children: [
-                        SectionHeader(
-                          title: "Upcoming Bookings",
-                          onSeeAll: () => _navigateToBookings(context),
-                        ),
-                        const BookingCard(
-                          courtName: "4b Sporting Club",
-                          date: "Today • 4:00 PM",
-                          duration: "2 hours",
-                          price: "\$45",
-                          image: 'lib/assets/basketball.jpeg',
-                        ),
-                        const BookingCard(
-                          courtName: "StreetBall Club",
-                          date: "Tomorrow • 3:30 PM",
-                          duration: "1.5 hours",
-                          image: 'lib/assets/basketball.jpeg',
-                          price: "\$30",
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
+                    //  Deleted
                     // Sports Categories
                     Column(
                       children: [
@@ -233,7 +222,9 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         SectionHeader(
                           title: "Recommended Venues",
-                          onSeeAll: () => _navigateToExplore(context),
+                          onSeeAll: () {
+                            widget.switchScreen(1);
+                          },
                         ),
                         SizedBox(
                           height: 200,
@@ -241,13 +232,13 @@ class _HomeScreenState extends State<HomeScreen>
                             scrollDirection: Axis.horizontal,
                             children: const [
                               FeaturedCard(
-                                image: 'assets/stadium1.jpg',
+                                image: 'lib/assets/images/home/4b-stadium.jpg',
                                 title: "4b Sporting Club",
                                 location: "Qayaa • 2km",
                                 rating: 4.8,
                               ),
                               FeaturedCard(
-                                image: 'assets/stadium2.jpg',
+                                image: 'lib/assets/images/home/stadium-2.jpg',
                                 title: "StreetBall Club",
                                 location: "Qayaa • 5km",
                                 rating: 4.6,
@@ -263,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         const SectionHeader(title: "Special Offers"),
                         PromotionCard(
-                          image: 'lib/assets/basketball.jpeg',
+                          image: 'lib/assets/images/home/offer.jpg',
                           title: "30% Off Evening Bookings",
                           description: "Book between 8PM - 11PM and save!",
                           onTap: () => _showOfferDetails(context),
@@ -300,15 +291,7 @@ class _HomeScreenState extends State<HomeScreen>
                       ],
                     ),
                     const SizedBox(height: 24),
-                    // How It Works
-                    Column(
-                      children: [
-                        const SectionHeader(title: "How It Works"),
-                        const SizedBox(height: 16),
-                        const HowItWorksSection(),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
+
                     // Premium CTA
                     _buildPremiumCta(),
                   ],
@@ -366,5 +349,69 @@ class _HomeScreenState extends State<HomeScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildDrawer(BuildContext context) {
+    return Drawer(
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CircleAvatar(
+                  radius: 30,
+                  backgroundImage: AssetImage('lib/assets/user_avatar.png'),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  "User Name",
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleLarge
+                      ?.copyWith(color: Colors.white),
+                ),
+                Text(
+                  "user@example.com",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          _buildDrawerItem(Icons.home, "Home", () => _navigateToPage(0)),
+          _buildDrawerItem(Icons.calendar_today, "My Bookings", () {}),
+          _buildDrawerItem(Icons.favorite, "Favorite Venues", () {}),
+          _buildDrawerItem(
+              Icons.settings, "Settings", () => _navigateToPage(2)),
+          _buildDrawerItem(Icons.help, "Help & Support", () {}),
+          _buildDrawerItem(Icons.article, "Terms & Conditions", () {}),
+          const Divider(),
+          _buildDrawerItem(Icons.logout, "Logout", () {
+            // Implement Logout Functionality
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
+    return ListTile(
+      leading: Icon(icon),
+      title: Text(title),
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+    );
+  }
+
+  void _navigateToPage(int index) {
+    setState(() {
+      // _pageIndex = index;
+    });
   }
 }

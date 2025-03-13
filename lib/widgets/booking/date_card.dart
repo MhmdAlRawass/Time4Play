@@ -7,23 +7,24 @@ class DateCard extends StatelessWidget {
   const DateCard({
     super.key,
     required this.date,
+    required this.selectedDate,
   });
 
   final DateTime date;
+  final DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
     final dayOfMonth = DateFormat('EEE').format(date);
     final month = DateFormat('MMM').format(date);
+    bool isSelected = date.day == selectedDate.day;
     return Column(
       children: [
         GradientBorderContainer(
           rightColor: Colors.redAccent,
           leftColor: const Color.fromARGB(255, 33, 40, 243),
-          borderWidth: 1,
+          borderWidth: isSelected ? 1 : 0,
           child: Container(
-            // padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-            // margin: const EdgeInsets.all(16),
             width: 50,
             height: 70,
             decoration: BoxDecoration(
@@ -40,7 +41,9 @@ class DateCard extends StatelessWidget {
                 Text(
                   dayOfMonth.toUpperCase(),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : null,
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                     fontStyle: GoogleFonts.inter().fontStyle,
@@ -49,7 +52,9 @@ class DateCard extends StatelessWidget {
                 Text(
                   date.day.toString(),
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : null,
                     fontSize: 26,
                     fontWeight: FontWeight.w500,
                     fontStyle: GoogleFonts.inter().fontStyle,

@@ -16,9 +16,14 @@ class SportCategoryButton extends StatelessWidget {
       width: 100,
       margin: const EdgeInsets.only(right: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF1D283A),
-        borderRadius: BorderRadius.circular(15),
-      ),
+          color: const Color(0xFF1D283A),
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              blurRadius: 2,
+              offset: Offset(0, 2),
+            ),
+          ]),
       child: TextButton(
         onPressed: () {},
         child: Column(

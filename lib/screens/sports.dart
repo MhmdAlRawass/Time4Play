@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:time4play/models/sport.dart';
 import 'package:time4play/screens/booking.dart';
-import 'package:time4play/widgets/gradient_border.dart';
+import 'package:time4play/widgets/sports/sport_card.dart';
 
 class SportsPage extends StatefulWidget {
   const SportsPage({
@@ -69,115 +68,10 @@ class _SportsPageState extends State<SportsPage>
                           ),
                         );
                       },
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 12),
-                        child: GradientBorderContainer(
-                          rightColor: Colors.redAccent,
-                          leftColor: const Color.fromARGB(255, 33, 40, 243),
-                          borderWidth: 2,
-                          child: Column(
-                            children: [
-                              Stack(
-                                children: [
-                                  Container(
-                                    width: double.infinity,
-                                    height: 200,
-                                    margin: EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                            'lib/assets/basketball.jpeg'),
-                                        fit: BoxFit.cover,
-                                      ),
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 10,
-                                    left: 12,
-                                    child: SizedBox(
-                                      width: 200,
-                                      child: Text(
-                                        sport.name,
-                                        style: GoogleFonts.inter(
-                                            fontSize: 20,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500
-                                            // fontWeight: FontWeight.bold,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 10,
-                                    right: 12,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          'Starting from',
-                                          textAlign: TextAlign.right,
-                                          style: GoogleFonts.inter(
-                                            fontSize: 12,
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Text(
-                                              '\$ ${sport.price.toStringAsFixed(2)}',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 24,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            Text(
-                                              ' / Hr',
-                                              style: GoogleFonts.inter(
-                                                fontSize: 12,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Positioned(
-                                    right: 0,
-                                    child: IconButton(
-                                      onPressed: () {},
-                                      splashColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      focusColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      icon: Icon(Icons.star_border),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Icon(Icons.location_on_outlined),
-                                  ),
-                                  Text(
-                                    sport.description,
-                                    style:
-                                        Theme.of(context).textTheme.bodyMedium,
-                                  ),
-                                ],
-                              )
-                            ],
-                          ),
-                        ),
+                      child: SportCard(
+                        name: sport.name,
+                        price: sport.price,
+                        description: sport.description,
                       ),
                     ),
                 ],

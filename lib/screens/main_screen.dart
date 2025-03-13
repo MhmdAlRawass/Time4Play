@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:time4play/screens/upcoming_bookings.dart';
 import 'package:time4play/screens/venues.dart';
 import 'package:time4play/screens/home.dart';
-import 'package:time4play/screens/settings.dart';
+import 'package:time4play/screens/settings/settings.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 class MainScreen extends StatefulWidget {
@@ -13,20 +14,50 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _pageIndex = 0;
-  final _pages = <Widget>[
-    HomeScreen(),
-    VenuesPage(),
-    SettingsPage(),
-  ];
+
+  void switchScreens(int page) {
+    setState(() {
+      _pageIndex = page;
+    });
+  }
+
+  void preloadAssetImage(BuildContext context) {
+    precacheImage(AssetImage('lib/assets/images/home/4b-stadium.jpg'), context);
+  }
+
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _pages = [
+      HomeScreen(
+        switchScreen: switchScreens,
+      ),
+      VenuesPage(
+        switchScreen: switchScreens,
+      ),
+      UpcomingBookingsScreen(
+        switchScreen: switchScreens,
+      ),
+      SettingsPage(
+        switchScreen: switchScreens,
+      ),
+    ];
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      preloadAssetImage(context);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      // ),
-      // drawer: Drawer(),
-      body: _pages[_pageIndex],
+      body: IndexedStack(
+        index: _pageIndex,
+        children: _pages,
+      ),
       bottomNavigationBar: SalomonBottomBar(
         currentIndex: _pageIndex,
         curve: Curves.linearToEaseOut,
@@ -42,8 +73,18 @@ class _MainScreenState extends State<MainScreen> {
             title: Text('Home'),
           ),
           SalomonBottomBarItem(
-            icon: Icon(Icons.play_arrow),
-            title: Text('Book'),
+            icon: ImageIcon(
+              AssetImage('lib/assets/icons/venue.png'),
+              size: 24,
+            ),
+            title: Text('Venues'),
+          ),
+          SalomonBottomBarItem(
+            icon: ImageIcon(
+              AssetImage('lib/assets/icons/playing.png'),
+              size: 24,
+            ),
+            title: Text('Bookings'),
           ),
           SalomonBottomBarItem(
             icon: Icon(Icons.person_outline),

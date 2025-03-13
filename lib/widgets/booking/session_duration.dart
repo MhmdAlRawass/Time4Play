@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
 class SessionDuration extends StatefulWidget {
-  const SessionDuration({super.key});
+  const SessionDuration({
+    super.key,
+    required this.onPressedDuration,
+  });
+
+  final void Function(int) onPressedDuration;
 
   @override
   _SessionDurationState createState() => _SessionDurationState();
@@ -10,6 +15,7 @@ class SessionDuration extends StatefulWidget {
 class _SessionDurationState extends State<SessionDuration> {
   int selectedIndex = 0;
   final List<String> durations = ['60 min', '90 min', '120 min'];
+  final List<int> durationInt = [60, 90, 120];
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +46,7 @@ class _SessionDurationState extends State<SessionDuration> {
               onTap: () {
                 setState(() {
                   selectedIndex = index;
+                  widget.onPressedDuration(durationInt[index]);
                 });
               },
               child: AnimatedContainer(

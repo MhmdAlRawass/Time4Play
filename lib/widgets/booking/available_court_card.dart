@@ -1,11 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 
 class AvailableCourtCard extends StatelessWidget {
-  const AvailableCourtCard({super.key});
+  const AvailableCourtCard({
+    super.key,
+    required this.timeSlot,
+    required this.selectedDuration,
+    required this.courtName,
+    required this.isIndoor,
+  });
+
+  final DateTime timeSlot;
+  final int selectedDuration;
+  final String courtName;
+  final bool isIndoor;
 
   @override
   Widget build(BuildContext context) {
+    final startTime = timeSlot;
+    final endTime = timeSlot.add(Duration(minutes: selectedDuration));
+
+    final startTimeFormatted = DateFormat('HH:mm').format(startTime);
+    final endTimeFormatted = DateFormat('HH:mm').format(endTime);
+
+    final textTimeFormatted = '$startTimeFormatted - $endTimeFormatted';
+
     return GradientBorderContainer(
       rightColor: Colors.redAccent,
       leftColor: const Color.fromARGB(255, 33, 40, 243),
@@ -22,14 +42,14 @@ class AvailableCourtCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'court 1',
+                  courtName,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  'Indoor',
+                  isIndoor ? 'Indoor ☂️' : 'Outdoor ☀️',
                   style: TextStyle(
                       // fontSize: 1,
                       ),
@@ -37,14 +57,14 @@ class AvailableCourtCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      '22:00 - 23:30',
+                      textTimeFormatted,
                       style: TextStyle(
                         color: Colors.white,
                       ),
                     ),
                     SizedBox(width: 4),
                     Text(
-                      '(90 mins)',
+                      '($selectedDuration mins)',
                       style: TextStyle(
                         color: Colors.red,
                         fontSize: 12,
