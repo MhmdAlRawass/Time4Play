@@ -72,6 +72,67 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
+  // Build User Image Section with a modern gradient border and edit icon.
+  Widget _buildUserImageSection() {
+    return Center(
+      child: Stack(
+        children: [
+          Container(
+            width: 130,
+            height: 130,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Colors.blueAccent,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    image: AssetImage('lib/assets/images/profile_default.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: 4,
+            right: 4,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: Icon(Icons.camera_alt,
+                    size: 20, color: Theme.of(context).primaryColor),
+                onPressed: () {
+                  // TODO: Implement image change logic.
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   // Build Personal Info Container
   Widget _buildPersonalInfoSection() {
     return GradientBorderContainer(
@@ -187,9 +248,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
           child: Column(
             children: [
+              _buildUserImageSection(),
+              const SizedBox(height: 24),
               _buildPersonalInfoSection(),
               const SizedBox(height: 16),
               _buildContactInfoSection(),

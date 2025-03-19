@@ -13,18 +13,12 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          ShaderMask(
-            shaderCallback: (bounds) => LinearGradient(
-              colors: [
-                Colors.redAccent,
-                const Color.fromARGB(255, 33, 40, 243),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ).createShader(bounds),
-            child: Text(title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    color: Colors.white, fontWeight: FontWeight.bold)),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           if (onSeeAll != null)
             TextButton(

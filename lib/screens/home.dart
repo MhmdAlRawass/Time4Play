@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'book_history_screen.dart';
+import 'package:time4play/screens/notification_history.dart';
 import '../widgets/home/section_header.dart';
 import '../widgets/home/sport_category_button.dart';
 import '../widgets/home/featured_card.dart';
@@ -22,17 +22,65 @@ class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
+  late Animation<Offset> _sportsSlideAnimation;
+  late Animation<Offset> _recommendedSlideAnimation;
+  late Animation<Offset> _offersSlideAnimation;
+  late Animation<Offset> _reviewsSlideAnimation;
+  late Animation<double> _premiumScaleAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1500),
     );
+
+    // Fade animation for the entire page
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
+
+    // Slide animations for each section
+    _sportsSlideAnimation = Tween<Offset>(
+      begin: const Offset(-1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.4, curve: Curves.easeOut),
+    ));
+
+    _recommendedSlideAnimation = Tween<Offset>(
+      begin: const Offset(1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.2, 0.6, curve: Curves.easeOut),
+    ));
+
+    _offersSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.4, 0.8, curve: Curves.easeOut),
+    ));
+
+    _reviewsSlideAnimation = Tween<Offset>(
+      begin: const Offset(-1, 0),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
+    ));
+
+    // Scale animation for the premium CTA
+    _premiumScaleAnimation =
+        Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.7, 1.0, curve: Curves.elasticOut),
+    ));
+
     _controller.forward();
   }
 
@@ -40,13 +88,6 @@ class _HomeScreenState extends State<HomeScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  void _navigateToBookings(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const BookingHistoryScreen()),
-    );
   }
 
   void _showOfferDetails(BuildContext context) {
@@ -72,17 +113,18 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       drawer: _buildDrawer(context),
-      // You can later add a custom drawer implementation here if needed.
       body: FadeTransition(
         opacity: _fadeAnimation,
         child: CustomScrollView(
           slivers: [
             // Hero Section
             SliverAppBar(
-              expandedHeight: 300,
               automaticallyImplyLeading: false,
+              expandedHeight: size.height * 0.35,
               flexibleSpace: FlexibleSpaceBar(
                 background: Stack(
                   fit: StackFit.expand,
@@ -136,21 +178,11 @@ class _HomeScreenState extends State<HomeScreen>
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: ShaderMask(
-                              shaderCallback: (bounds) => LinearGradient(
-                                colors: [
-                                  Colors.redAccent,
-                                  const Color.fromARGB(255, 33, 40, 243),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ).createShader(bounds),
-                              child: Text(
-                                "Find a Venue",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  color: Colors.white,
-                                ),
+                            child: Text(
+                              "Find a Venue",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -158,17 +190,34 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     ),
                     Positioned(
-                      top: 56,
-                      right: 16,
-                      child: IconButton(
-                        onPressed: () {
-                          // Insert logic for opening your manual drawer
-                          Scaffold.of(context).openDrawer();
-                        },
-                        icon: const Icon(Icons.notifications_outlined),
-                        iconSize: 30,
-                      ),
-                    )
+                        top: 56,
+                        right: 16,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (ctx) => NotificationHistory(),
+                                  ),
+                                );
+                              },
+                              icon: const Icon(Icons.notifications_outlined),
+                              iconSize: 30,
+                            ),
+                            Builder(builder: (context) {
+                              return IconButton(
+                                onPressed: () {
+                                  Scaffold.of(context).openDrawer();
+                                },
+                                icon: Icon(Icons.menu),
+                                iconSize: 30,
+                              );
+                            }),
+                          ],
+                        )),
                   ],
                 ),
               ),
@@ -180,120 +229,156 @@ class _HomeScreenState extends State<HomeScreen>
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Upcoming Bookings
-                    //  Deleted
                     // Sports Categories
-                    Column(
-                      children: [
-                        const SectionHeader(title: "Sports Categories"),
-                        SizedBox(
-                          height: 100,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: const [
-                              SportCategoryButton(
-                                icon: Icons.sports_soccer,
-                                label: "Football",
-                              ),
-                              SportCategoryButton(
-                                icon: Icons.sports_basketball,
-                                label: "Basketball",
-                              ),
-                              SportCategoryButton(
-                                icon: Icons.sports_tennis,
-                                label: "Tennis",
-                              ),
-                              SportCategoryButton(
-                                icon: Icons.sports_volleyball,
-                                label: "Volleyball",
-                              ),
-                              SportCategoryButton(
-                                icon: Icons.sports,
-                                label: "More",
-                              ),
-                            ],
+                    SlideTransition(
+                      position: _sportsSlideAnimation,
+                      child: Column(
+                        children: [
+                          const SectionHeader(title: "Sports Categories"),
+                          SizedBox(
+                            height: 100,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: const [
+                                SportCategoryButton(
+                                  icon: Icons.sports_soccer,
+                                  label: "Football",
+                                ),
+                                SportCategoryButton(
+                                  icon: Icons.sports_basketball,
+                                  label: "Basketball",
+                                ),
+                                SportCategoryButton(
+                                  icon: Icons.sports_tennis,
+                                  label: "Tennis",
+                                ),
+                                SportCategoryButton(
+                                  icon: Icons.sports_volleyball,
+                                  label: "Volleyball",
+                                ),
+                                SportCategoryButton(
+                                  icon: Icons.sports,
+                                  label: "More",
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 24),
+
                     // Recommended Venues
-                    Column(
-                      children: [
-                        SectionHeader(
-                          title: "Recommended Venues",
-                          onSeeAll: () {
-                            widget.switchScreen(1);
-                          },
-                        ),
-                        SizedBox(
-                          height: 200,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: const [
-                              FeaturedCard(
-                                image: 'lib/assets/images/home/4b-stadium.jpg',
-                                title: "4b Sporting Club",
-                                location: "Qayaa • 2km",
-                                rating: 4.8,
-                              ),
-                              FeaturedCard(
-                                image: 'lib/assets/images/home/stadium-2.jpg',
-                                title: "StreetBall Club",
-                                location: "Qayaa • 5km",
-                                rating: 4.6,
-                              ),
-                            ],
+                    SlideTransition(
+                      position: _recommendedSlideAnimation,
+                      child: Column(
+                        children: [
+                          SectionHeader(
+                            title: "Recommended Venues",
+                            onSeeAll: () => widget.switchScreen(1),
                           ),
-                        ),
-                      ],
+                          SizedBox(
+                            height: 200,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: const [
+                                FeaturedCard(
+                                  image:
+                                      'lib/assets/images/home/4b-stadium.jpg',
+                                  title: "4b Sporting Club",
+                                  location: "Qayaa • 2km",
+                                  rating: 4.8,
+                                ),
+                                FeaturedCard(
+                                  image: 'lib/assets/images/home/stadium-2.jpg',
+                                  title: "StreetBall Club",
+                                  location: "Qayaa • 5km",
+                                  rating: 4.6,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 24),
+
                     // Special Offers
-                    Column(
-                      children: [
-                        const SectionHeader(title: "Special Offers"),
-                        PromotionCard(
-                          image: 'lib/assets/images/home/offer.jpg',
-                          title: "30% Off Evening Bookings",
-                          description: "Book between 8PM - 11PM and save!",
-                          onTap: () => _showOfferDetails(context),
-                        ),
-                      ],
+                    SlideTransition(
+                      position: _offersSlideAnimation,
+                      child: Column(
+                        children: [
+                          const SectionHeader(title: "Special Offers"),
+                          PromotionCard(
+                            image: 'lib/assets/images/home/offer.jpg',
+                            title: "30% Off Evening Bookings",
+                            description: "Book between 8PM - 11PM and save!",
+                            onTap: () => _showOfferDetails(context),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 24),
+
                     // Recent Reviews
-                    Column(
-                      children: [
-                        const SectionHeader(title: "Recent Reviews"),
-                        SizedBox(
-                          height: 200,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: const [
-                              ReviewCard(
-                                user: "Alex Johnson",
-                                comment:
-                                    "Fantastic facilities and friendly staff!",
-                                rating: 5.0,
-                                image: 'assets/user1.jpg',
-                              ),
-                              ReviewCard(
-                                user: "Sarah Wilson",
-                                comment:
-                                    "Well-maintained courts, highly recommend!",
-                                rating: 4.5,
-                                image: 'assets/user2.jpg',
-                              ),
-                            ],
+                    SlideTransition(
+                      position: _reviewsSlideAnimation,
+                      child: Column(
+                        children: [
+                          const SectionHeader(title: "Recent Reviews"),
+                          SizedBox(
+                            height: 200,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(-1, 0),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(
+                                    parent: _controller,
+                                    curve: const Interval(0.6, 1.0,
+                                        curve: Curves.easeOut),
+                                  )),
+                                  child: const ReviewCard(
+                                    user: "User 1",
+                                    comment:
+                                        "Fantastic facilities and friendly staff!",
+                                    rating: 5.0,
+                                    image: 'assets/user1.jpg',
+                                  ),
+                                ),
+                                SlideTransition(
+                                  position: Tween<Offset>(
+                                    begin: const Offset(-1, 0),
+                                    end: Offset.zero,
+                                  ).animate(CurvedAnimation(
+                                    parent: _controller,
+                                    curve: const Interval(0.7, 1.0,
+                                        curve: Curves.easeOut),
+                                  )),
+                                  child: const ReviewCard(
+                                    user: "User 2",
+                                    comment:
+                                        "Well-maintained courts, highly recommend!",
+                                    rating: 4.5,
+                                    image:
+                                        'https://unsplash.com/photos/a-man-wearing-glasses-and-a-black-shirt-iEEBWgY_6lA',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 24),
 
                     // Premium CTA
-                    _buildPremiumCta(),
+                    ScaleTransition(
+                      scale: _premiumScaleAnimation,
+                      child: _buildPremiumCta(),
+                    ),
                   ],
                 ),
               ),
@@ -353,59 +438,94 @@ class _HomeScreenState extends State<HomeScreen>
 
   Widget _buildDrawer(BuildContext context) {
     return Drawer(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
+      ),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
+          UserAccountsDrawerHeader(
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).scaffoldBackgroundColor,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage('lib/assets/user_avatar.png'),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: Theme.of(context).cardColor.withOpacity(0.8),
+              child: Text(
+                'MR',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  "User Name",
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(color: Colors.white),
-                ),
-                Text(
-                  "user@example.com",
-                  style: TextStyle(color: Colors.white70),
-                ),
-              ],
+              ),
+            ),
+            accountName: Text(
+              "Mhmd",
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+            ),
+            accountEmail: Text(
+              "user@example.com",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+              ),
             ),
           ),
-          _buildDrawerItem(Icons.home, "Home", () => _navigateToPage(0)),
-          _buildDrawerItem(Icons.calendar_today, "My Bookings", () {}),
-          _buildDrawerItem(Icons.favorite, "Favorite Venues", () {}),
-          _buildDrawerItem(
-              Icons.settings, "Settings", () => _navigateToPage(2)),
-          _buildDrawerItem(Icons.help, "Help & Support", () {}),
-          _buildDrawerItem(Icons.article, "Terms & Conditions", () {}),
-          const Divider(),
-          _buildDrawerItem(Icons.logout, "Logout", () {
-            // Implement Logout Functionality
-          }),
+          ListTile(
+            leading: Icon(Icons.home, color: Theme.of(context).iconTheme.color),
+            title: Text("Home"),
+            onTap: () => _navigateToPage(0),
+          ),
+          ListTile(
+            leading: Icon(Icons.calendar_today,
+                color: Theme.of(context).iconTheme.color),
+            title: Text("My Bookings"),
+            onTap: () {},
+          ),
+          ListTile(
+            leading:
+                Icon(Icons.favorite, color: Theme.of(context).iconTheme.color),
+            title: Text("Favorite Venues"),
+            onTap: () {},
+          ),
+          ListTile(
+            leading:
+                Icon(Icons.settings, color: Theme.of(context).iconTheme.color),
+            title: Text("Settings"),
+            onTap: () => _navigateToPage(2),
+          ),
+          ListTile(
+            leading: Icon(Icons.help, color: Theme.of(context).iconTheme.color),
+            title: Text("Help & Support"),
+            onTap: () {},
+          ),
+          ListTile(
+            leading:
+                Icon(Icons.article, color: Theme.of(context).iconTheme.color),
+            title: Text("Terms & Conditions"),
+            onTap: () {},
+          ),
+          Divider(
+            color: Theme.of(context).dividerColor,
+          ),
+          ListTile(
+            leading:
+                Icon(Icons.logout, color: Theme.of(context).iconTheme.color),
+            title: Text("Logout"),
+            onTap: () {
+              // Implement Logout Functionality
+            },
+          ),
         ],
       ),
-    );
-  }
-
-  Widget _buildDrawerItem(IconData icon, String title, VoidCallback onTap) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      onTap: () {
-        Navigator.pop(context);
-        onTap();
-      },
     );
   }
 

@@ -20,7 +20,7 @@ class _UpcomingBookingsScreenState extends State<UpcomingBookingsScreen>
   late AnimationController _settingsController;
   late Animation<double> _settingsFadeAnimation;
   late TabController _tabController;
-  int _currentIndex = 0; // Keeps track of the active tab
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -210,6 +210,7 @@ PreferredSizeWidget _buildAppBar(
   final isIos = Platform.isIOS;
 
   return AppBar(
+    surfaceTintColor: Colors.transparent,
     title: Text(
       'My Bookings',
       style: TextStyle(

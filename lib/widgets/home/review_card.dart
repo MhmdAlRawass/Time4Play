@@ -30,7 +30,7 @@ class ReviewCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                backgroundImage: AssetImage(image),
+                backgroundImage: NetworkImage(image),
                 radius: 20,
                 onBackgroundImageError: (exception, stackTrace) =>
                     const Icon(Icons.person),

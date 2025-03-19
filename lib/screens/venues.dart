@@ -20,7 +20,7 @@ class VenuesPage extends StatefulWidget {
 
 class _VenuesPageState extends State<VenuesPage>
     with SingleTickerProviderStateMixin {
-  late AnimationController _bookingsController;
+  late AnimationController _venuesController;
   late Animation<double> _bookingsFadeAnimation;
   late Size size;
 
@@ -74,19 +74,19 @@ class _VenuesPageState extends State<VenuesPage>
   @override
   void initState() {
     super.initState();
-    _bookingsController = AnimationController(
+    _venuesController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
     );
     _bookingsFadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _bookingsController, curve: Curves.easeIn),
+      CurvedAnimation(parent: _venuesController, curve: Curves.easeIn),
     );
-    _bookingsController.forward();
+    _venuesController.forward();
   }
 
   @override
   void dispose() {
-    _bookingsController.dispose();
+    _venuesController.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -95,13 +95,13 @@ class _VenuesPageState extends State<VenuesPage>
   final List<Map<String, dynamic>> venues = [
     {
       "title": "4b Sporting Club",
-      "location": "Koramangala, Bangalore",
+      "location": "Saida, Lebanon",
       "sports": ["Football", "Basketball", "Padel"],
       "image": "lib/assets/images/home/4b-stadium.jpg"
     },
     {
       "title": "Play Arena",
-      "location": "Sarjapur Road, Bangalore",
+      "location": "Beirut, Lebanon",
       "sports": ["Football", "Cricket"],
       "image": "lib/assets/images/home/4b-stadium.jpg"
     },
@@ -354,9 +354,12 @@ class _VenuesPageState extends State<VenuesPage>
                     ),
                   ),
                   Positioned(
-                    top: 10,
-                    right: 12,
+                    top: 0,
+                    right: 0,
                     child: IconButton(
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.black38,
+                      ),
                       icon: const Icon(Icons.star_border),
                       onPressed: () {},
                     ),

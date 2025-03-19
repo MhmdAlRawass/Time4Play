@@ -78,13 +78,13 @@ class _FilterVenuesSheetState extends State<FilterVenuesSheet> {
                   style: GoogleFonts.inter(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onBackground,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => Navigator.pop(context),
-                  color: theme.colorScheme.onBackground,
+                  color: theme.colorScheme.onSurface,
                 ),
               ],
             ),

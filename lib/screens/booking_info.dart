@@ -101,7 +101,7 @@ class BookingInfoPage extends StatelessWidget {
   void _showCancelDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (context) => AlertDialog.adaptive(
         title: Text('Cancel Booking'),
         content: Text('Are you sure you want to cancel this booking?'),
         actions: [

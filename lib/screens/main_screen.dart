@@ -1,9 +1,12 @@
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:time4play/screens/upcoming_bookings.dart';
 import 'package:time4play/screens/venues.dart';
 import 'package:time4play/screens/home.dart';
 import 'package:time4play/screens/settings/settings.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:badges/src/badge.dart'
+    as custom_badge; // Import the badges package with a prefix
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -80,15 +83,29 @@ class _MainScreenState extends State<MainScreen> {
             title: Text('Venues'),
           ),
           SalomonBottomBarItem(
-            icon: ImageIcon(
-              AssetImage('lib/assets/icons/playing.png'),
-              size: 24,
+            icon: custom_badge.Badge(
+              showBadge: true,
+              badgeStyle: BadgeStyle(
+                badgeColor: Theme.of(context).colorScheme.primary,
+              ),
+              badgeContent: Text(
+                '2',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                ),
+              ),
+              position: BadgePosition.topEnd(top: -10, end: -10),
+              child: ImageIcon(
+                AssetImage('lib/assets/icons/playing.png'),
+                size: 24,
+              ),
             ),
             title: Text('Bookings'),
           ),
           SalomonBottomBarItem(
-            icon: Icon(Icons.person_outline),
-            title: Text('Profile'),
+            icon: Icon(Icons.settings_outlined),
+            title: Text('Settings'),
           ),
         ],
       ),

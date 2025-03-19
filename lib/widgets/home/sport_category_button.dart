@@ -21,7 +21,7 @@ class SportCategoryButton extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               blurRadius: 2,
-              offset: Offset(0, 2),
+              // offset: Offset(0, 2),
             ),
           ]),
       child: TextButton(
