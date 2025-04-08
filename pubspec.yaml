@@ -21,6 +21,8 @@ dependencies:
   flutter_launcher_icons: ^0.14.3  # Added for app icons
   badges: ^3.1.2
   visibility_detector: ^0.4.0+2
+  flutter_native_splash: ^2.4.5
+  lottie: ^3.3.1
 
 dev_dependencies:
   flutter_test:
@@ -43,3 +45,17 @@ flutter:
     - lib/assets/images/home/
     - lib/assets/images/venues/
     - lib/assets/icons/
+    - lib/assets/animations/
+
+flutter_native_splash:
+  color: "#0F172A" 
+  image: lib/assets/icons/logo.jpeg
+  branding: lib/assets/icons/logo.jpeg
+  color_dark: "#0F172A"
+  image_dark: lib/assets/icons/logo.jpeg
+  android_12:
+    image: lib/assets/icons/logo.jpeg
+    icon_background_color: "#0F172A"
+    image_dark: lib/assets/icons/logo.jpeg
+    icon_background_color_dark: "#0F172A"
+  web: false

@@ -57,16 +57,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         readOnly: readOnly,
         onTap: onTap,
         decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
+            labelText: label,
+            floatingLabelAlignment: FloatingLabelAlignment.start,
+            floatingLabelBehavior: FloatingLabelBehavior.always
+            // border: const OutlineInputBorder(),
+            ),
       ),
     );
   }
 
   // Save Profile Action
   void _saveProfile() {
-    // TODO: Add your save logic here.
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Profile saved successfully!")),
     );
@@ -123,7 +124,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 icon: Icon(Icons.camera_alt,
                     size: 20, color: Theme.of(context).primaryColor),
                 onPressed: () {
-                  // TODO: Implement image change logic.
+                  // Implement image picker functionality here
                 },
               ),
             ),
@@ -246,6 +247,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         title: const Text("Edit Profile"),
         centerTitle: true,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _saveProfile,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        tooltip: 'Save Profile',
+        child: const Icon(
+          Icons.check,
+          size: 30,
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
@@ -257,22 +269,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               _buildContactInfoSection(),
               const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveProfile,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text(
-                    "Save Changes",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ),
             ],
           ),
         ),

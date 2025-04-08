@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:time4play/screens/checkout.dart';
+import 'package:time4play/screens/venues/checkout.dart';
 import 'package:time4play/widgets/booking/available_court_card.dart';
 import 'dart:io' show Platform;
 import 'package:time4play/widgets/booking/date_card.dart';

@@ -75,70 +75,70 @@ class _NotificationHistoryState extends State<NotificationHistory>
         begin: const Offset(0, 1),
         end: Offset.zero,
       ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-      child: Dismissible(
-        key: Key(notification['title']),
-        onDismissed: (direction) {
-          _removeNotification(index);
-        },
-        background: Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.only(left: 20),
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.transparent.withOpacity(0.3),
+          border: Border.all(
+            width: 1,
+            color: Theme.of(context).colorScheme.primary,
           ),
-          child: const Icon(Icons.delete, color: Colors.red),
+          borderRadius: BorderRadius.circular(12),
         ),
-        secondaryBackground: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
-          decoration: BoxDecoration(
-            color: Colors.red.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(Icons.delete, color: Colors.red),
-        ),
-        child: Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.transparent.withOpacity(0.3),
-            border: Border.all(
-              width: 1,
-              color: Theme.of(context).colorScheme.primary,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12), // Ensure rounded corners
+          child: Dismissible(
+            key: Key(notification['title']),
+            onDismissed: (direction) {
+              _removeNotification(index);
+            },
+            background: Container(
+              alignment: Alignment.centerLeft,
+              padding: const EdgeInsets.only(left: 20),
+              color: Colors.red
+                  .withOpacity(0.2), // Red background only for content
+              child: const Icon(Icons.delete, color: Colors.red),
             ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor: Theme.of(context).primaryColor.withOpacity(0.2),
-              child: Icon(
-                notification['icon'],
-                color: Theme.of(context).primaryColor,
+            secondaryBackground: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              color: Colors.red
+                  .withOpacity(0.2), // Red background for the other side
+              child: const Icon(Icons.delete, color: Colors.red),
+            ),
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundColor:
+                    Theme.of(context).primaryColor.withOpacity(0.2),
+                child: Icon(
+                  notification['icon'],
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
-            ),
-            title: Text(
-              notification['title'],
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  notification['message'],
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  notification['time'],
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 12,
+              title: Text(
+                notification['title'],
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification['message'],
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    notification['time'],
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+              isThreeLine: true,
             ),
-            isThreeLine: true,
           ),
         ),
       ),

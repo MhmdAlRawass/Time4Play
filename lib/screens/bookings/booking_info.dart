@@ -19,7 +19,10 @@ class BookingInfoPage extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final borderColor =
+        Theme.of(context).colorScheme.primary.withAlpha((0.4 * 255).toInt());
     return Scaffold(
       appBar: AppBar(
         title: Text('Booking Details'),
@@ -39,8 +42,16 @@ class BookingInfoPage extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16),
-          Padding(
-            padding: EdgeInsets.all(16),
+          Container(
+            margin: EdgeInsets.all(8),
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(
+                width: 1,
+                color: borderColor,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

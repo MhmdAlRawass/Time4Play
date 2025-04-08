@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:time4play/screens/booking_info.dart';
+import 'package:time4play/screens/bookings/booking_info.dart';
 import 'package:time4play/widgets/upcoming_bookings/booking_card.dart';
 
 class UpcomingBookingsScreen extends StatefulWidget {

@@ -19,7 +19,8 @@ class PromotionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 150,
+        height: 170,
+        width: double.infinity,
         margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
@@ -27,23 +28,29 @@ class PromotionCard extends StatelessWidget {
             image: AssetImage(image),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.5), BlendMode.darken),
+              Colors.black.withOpacity(0.5),
+              BlendMode.darken,
+            ),
           ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(title,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold)),
+              Text(
+                title,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
-              Text(description,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14)),
+              Text(
+                description,
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
             ],
           ),
         ),

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:time4play/models/sport.dart';
-import 'package:time4play/screens/sports.dart';
+import 'package:time4play/screens/venues/sports.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 import 'package:time4play/widgets/venues/filter_venue_sheet.dart';
 

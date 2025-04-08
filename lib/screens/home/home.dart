@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:time4play/screens/notification_history.dart';
-import '../widgets/home/section_header.dart';
-import '../widgets/home/sport_category_button.dart';
-import '../widgets/home/featured_card.dart';
-import '../widgets/home/promotion_card.dart';
-import '../widgets/home/review_card.dart';
+import 'package:time4play/screens/home/notification_history.dart';
+import '../../widgets/home/section_header.dart';
+import '../../widgets/home/sport_category_button.dart';
+import '../../widgets/home/featured_card.dart';
+import '../../widgets/home/promotion_card.dart';
+import '../../widgets/home/review_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -311,8 +311,9 @@ class _HomeScreenState extends State<HomeScreen>
                           const SectionHeader(title: "Special Offers"),
                           PromotionCard(
                             image: 'lib/assets/images/home/offer.jpg',
-                            title: "30% Off Evening Bookings",
-                            description: "Book between 8PM - 11PM and save!",
+                            title: "Limited Time Offer",
+                            description:
+                                "Book now and get a free coaching session!",
                             onTap: () => _showOfferDetails(context),
                           ),
                         ],

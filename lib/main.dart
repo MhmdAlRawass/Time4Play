@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:time4play/providers/country_provider.dart';
-// import 'package:time4play/screens/login_screen.dart';
-import 'package:time4play/screens/main_screen.dart';
+import 'package:time4play/screens/on_boarding.dart';
 
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
@@ -71,7 +70,7 @@ class MyApp extends StatelessWidget {
       title: 'Time4Play',
       debugShowCheckedModeBanner: false,
       theme: darkTheme,
-      home: const MainScreen(),
+      home: const OnboardingScreen(),
     );
   }
 }

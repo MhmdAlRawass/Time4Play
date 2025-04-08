@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:time4play/screens/sign_up_and_steps/contact_info.dart';
+import 'package:time4play/screens/sign_up_and_steps/finished_settingup.dart';
 import 'package:time4play/screens/sign_up_and_steps/personal_info.dart';
 
 class CreateProfile extends StatefulWidget {
@@ -14,9 +15,12 @@ class _CreateProfileState extends State<CreateProfile> {
   int stepsCounter = 0;
 
   void goToNextStep() {
-    setState(() {
-      stepsCounter++;
-    });
+    if (stepsCounter < 2) {
+      setState(() {
+        stepsCounter++;
+      });
+      print(stepsCounter);
+    }
   }
 
   @override
@@ -26,6 +30,7 @@ class _CreateProfileState extends State<CreateProfile> {
     List<Widget> steps = [
       PersonalInfoPage(goToNextStep: goToNextStep),
       ContactInfoPage(goToNextStep: goToNextStep),
+      FinishedProfile(),
     ];
 
     return Scaffold(

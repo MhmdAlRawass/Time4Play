@@ -1,8 +1,8 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
-import 'package:time4play/screens/upcoming_bookings.dart';
-import 'package:time4play/screens/venues.dart';
-import 'package:time4play/screens/home.dart';
+import 'package:time4play/screens/bookings/upcoming_bookings.dart';
+import 'package:time4play/screens/venues/venues.dart';
+import 'package:time4play/screens/home/home.dart';
 import 'package:time4play/screens/settings/settings.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:badges/src/badge.dart'

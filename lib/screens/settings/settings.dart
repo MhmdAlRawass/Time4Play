@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:time4play/screens/edit_profile.dart';
+import 'package:time4play/screens/settings/edit_profile.dart';
 import 'package:time4play/screens/settings/how_to_use.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 

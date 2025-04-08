@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:time4play/models/sport.dart';
-import 'package:time4play/screens/booking.dart';
+import 'package:time4play/screens/venues/booking.dart';
 import 'package:time4play/widgets/sports/sport_card.dart';
 
 class SportsPage extends StatefulWidget {
