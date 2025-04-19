@@ -1,20 +1,4 @@
-class Admin {
-  int id;
-  String name;
-  String email;
-  String password;
-  String roleType;
-  int companyId;
-
-  Admin({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.password,
-    required this.roleType,
-    required this.companyId,
-  });
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Company {
   String id;
@@ -24,6 +8,7 @@ class Company {
   String city;
   double latitude;
   double longitude;
+  // List<Sport> sports = [];
 
   Company({
     required this.id,
@@ -33,7 +18,20 @@ class Company {
     required this.city,
     required this.latitude,
     required this.longitude,
+    // this.sports = [],
   });
+
+  factory Company.fromFirestore(Map<String, dynamic> data, String id) {
+    return Company(
+      id: id,
+      name: data['name'],
+      adminId: data['adminId'],
+      address: data['address'],
+      city: data['city'],
+      latitude: data['latitude'],
+      longitude: data['longitude'],
+    );
+  }
 }
 
 class Sport {
@@ -50,6 +48,16 @@ class Sport {
     required this.pricePerHour,
     required this.companyId,
   });
+
+  factory Sport.fromFirestore(Map<String, dynamic> data, String id) {
+    return Sport(
+      id: id,
+      name: data['name'],
+      companyId: data['companyId'],
+      description: data['description'],
+      pricePerHour: data['pricePerHour'].toDouble(),
+    );
+  }
 }
 
 class Court {
@@ -57,13 +65,25 @@ class Court {
   String name;
   String sportId;
   String companyId;
+  bool isIndoor;
 
   Court({
     required this.id,
     required this.name,
     required this.sportId,
     required this.companyId,
+    required this.isIndoor,
   });
+
+  factory Court.fromFirestore(Map<String, dynamic> data, String id) {
+    return Court(
+      id: id,
+      name: data['name'],
+      companyId: data['companyId'],
+      sportId: data['sportId'],
+      isIndoor: data['isIndoor'] ?? false,
+    );
+  }
 }
 
 class Customer {
@@ -112,6 +132,18 @@ class Booking {
     required this.duration,
     required this.createdAt,
   });
+
+  factory Booking.fromFirestore(Map<String, dynamic> data) {
+    return Booking(
+      id: data['id'],
+      customerId: data['customerId'],
+      sportId: data['sportId'],
+      courtId: data['courtId'],
+      startTime: (data['startTime'] as Timestamp).toDate(),
+      duration: data['duration'],
+      createdAt: (data['createdAt'] as Timestamp).toDate(),
+    );
+  }
 }
 
 class Notification {

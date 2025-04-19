@@ -1,40 +1,42 @@
-// contact_info_page.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import 'package:time4play/providers/country_provider.dart';
+import 'package:time4play/services/country_service.dart';
 import 'verify_page.dart';
 
 class ContactInfoPage extends StatefulWidget {
+  const ContactInfoPage({
+    super.key,
+    required this.goToNextStep,
+    required this.countryController,
+    required this.phoneController,
+    required this.streetController,
+    required this.postalCodeController,
+    required this.cityController,
+  });
+
   final Function goToNextStep;
-  const ContactInfoPage({super.key, required this.goToNextStep});
+  final TextEditingController countryController;
+  final TextEditingController phoneController;
+  final TextEditingController streetController;
+  final TextEditingController postalCodeController;
+  final TextEditingController cityController;
+
   @override
-  State<StatefulWidget> createState() {
-    return _ContactInfoPageState();
-  }
+  State<ContactInfoPage> createState() => _ContactInfoPageState();
 }
 
 class _ContactInfoPageState extends State<ContactInfoPage> {
   final _formKey = GlobalKey<FormState>();
   late Size size;
-  final TextEditingController countryController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController streetController = TextEditingController();
-  final TextEditingController postalCodeController = TextEditingController();
-  final TextEditingController cityController = TextEditingController();
 
-  // Selected calling code (for phone) and country name (for residence)
   String _selectedCallingCode = "";
   String _selectedCountryName = "";
 
+  final CountryService _countryService = CountryService();  // CountryService instance
+
   @override
   void dispose() {
-    countryController.dispose();
-    phoneController.dispose();
-    streetController.dispose();
-    postalCodeController.dispose();
-    cityController.dispose();
     super.dispose();
   }
 
@@ -70,28 +72,25 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
               key: _formKey,
               child: Column(
                 children: [
+                  // Country Picker
                   TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Country of Residence is required';
-                      }
-                      return null;
-                    },
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Country of Residence is required' : null,
                     readOnly: true,
-                    controller: countryController,
-                    decoration:
-                        _inputDecoration(context, 'Country of Residence *'),
+                    controller: widget.countryController,
+                    decoration: _inputDecoration(context, 'Country of Residence *'),
                     onTap: () async {
                       final result = await _openCountryResidencePicker();
                       if (result != null) {
                         setState(() {
                           _selectedCountryName = result;
-                          countryController.text = result;
+                          widget.countryController.text = result;
                         });
                       }
                     },
                   ),
                   const SizedBox(height: 20),
+                  // Phone Picker + Field + Verify Button
                   Row(
                     children: [
                       GestureDetector(
@@ -104,8 +103,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             border: Border.all(
                                 color: Theme.of(context).colorScheme.onPrimary),
@@ -125,16 +123,11 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Number is required';
-                            }
-                            return null;
-                          },
-                          controller: phoneController,
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Number is required' : null,
+                          controller: widget.phoneController,
                           keyboardType: TextInputType.phone,
-                          decoration:
-                              _inputDecoration(context, 'Phone Number *'),
+                          decoration: _inputDecoration(context, 'Phone Number *'),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -145,18 +138,17 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                             MaterialPageRoute(
                               builder: (context) => VerifyPage(
                                 phoneNumber:
-                                    '$_selectedCallingCode ${phoneController.text}',
+                                    '$_selectedCallingCode ${widget.phoneController.text}',
                               ),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          // backgroundColor: Theme.of(context).colorScheme.primary,
                           foregroundColor:
                               Theme.of(context).colorScheme.onPrimary,
                           overlayColor: Theme.of(context).colorScheme.primary,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: BorderSide(
@@ -165,54 +157,36 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                             ),
                           ),
                         ),
-                        child: Text('Verify'),
+                        child: const Text('Verify'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // Modern TextFormField for Street Name.
+                  // Street
                   TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Street Name is required';
-                      }
-                      return null;
-                    },
-                    controller: streetController,
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Street Name is required' : null,
+                    controller: widget.streetController,
                     decoration: _inputDecoration(context, 'Street Name'),
                     autocorrect: false,
                     enableSuggestions: false,
                   ),
                   const SizedBox(height: 20),
-                  // Modern TextFormField for Postal Code.
+                  // Postal Code
                   TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Postal Code is required, if not available, enter 0';
-                      }
-                      return null;
-                    },
-                    controller: postalCodeController,
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'Postal Code is required, if not available, enter 0' : null,
+                    controller: widget.postalCodeController,
                     decoration: _inputDecoration(context, 'Postal Code'),
                     autocorrect: false,
                     enableSuggestions: false,
                   ),
                   const SizedBox(height: 20),
-                  // Modern TextFormField for City.
+                  // City
                   TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'City is required';
-                      }
-                      return null;
-                    },
-                    controller: cityController,
-                    style: TextStyle(
-                        color: Theme.of(context).textTheme.bodyMedium?.color),
+                    validator: (value) =>
+                        value == null || value.isEmpty ? 'City is required' : null,
+                    controller: widget.cityController,
                     decoration: _inputDecoration(context, 'City'),
                     autocorrect: false,
                     enableSuggestions: false,
@@ -224,14 +198,11 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
           const SizedBox(height: 24),
           Center(
             child: ElevatedButton(
-              onPressed: () {
-                _formValidate();
-              },
+              onPressed: _formValidate,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -252,16 +223,13 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
         fontSize: 14,
       ),
       floatingLabelBehavior: FloatingLabelBehavior.always,
-      floatingLabelAlignment: FloatingLabelAlignment.start,
       border: UnderlineInputBorder(
         borderSide: BorderSide(
-          width: 1,
           color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
       enabledBorder: UnderlineInputBorder(
         borderSide: BorderSide(
-          width: 1,
           color: Theme.of(context).colorScheme.onPrimary,
         ),
       ),
@@ -274,296 +242,6 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
     );
   }
 
-  /// Opens a modal bottom sheet to select the country of residence.
-  /// Returns the country name.
-  Future<String?> _openCountryResidencePicker() async {
-    final countryProvider =
-        Provider.of<CountryProvider>(context, listen: false);
-    await countryProvider.fetchCountries();
-    final countries = countryProvider.countries;
-    return showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FutureBuilder<List<dynamic>>(
-          future: _fetchCountries(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(
-                height: size.height * 0.7,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return Container(
-                height: size.height * 0.7,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text('Error: ${snapshot.error}'),
-                ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Container(
-                height: size.height * 0.7,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: Text('No countries found'),
-                ),
-              );
-            } else {
-              final List<dynamic> countries = snapshot.data!;
-              String searchQuery = "";
-              return StatefulBuilder(
-                builder: (BuildContext context, StateSetter setModalState) {
-                  final List<dynamic> filteredCountries =
-                      countries.where((country) {
-                    final countryName = country['name']?['common'] ?? '';
-                    return countryName
-                        .toLowerCase()
-                        .contains(searchQuery.toLowerCase());
-                  }).toList();
-
-                  return Container(
-                    height: size.height * 0.7,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: SafeArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Select Country of Residence',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w400),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              hintText: 'Search country...',
-                              prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              setModalState(() {
-                                searchQuery = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: filteredCountries.length,
-                              itemBuilder: (context, index) {
-                                final country = filteredCountries[index];
-                                final countryName =
-                                    country['name']?['common'] ?? 'N/A';
-                                return ListTile(
-                                  title: Text(countryName),
-                                  onTap: () {
-                                    Navigator.of(context).pop(countryName);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            }
-          },
-        );
-      },
-    );
-  }
-
-  /// Opens a modal bottom sheet to select a phone calling code.
-  /// Returns the calling code (e.g. "+961").
-  Future<String?> _openPhoneCodePicker() async {
-    return showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return FutureBuilder<List<dynamic>>(
-          future: _fetchCountries(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Container(
-                height: size.height * 0.7,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return Container(
-                height: size.height * 0.7,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Center(
-                  child: Text('Error: ${snapshot.error}'),
-                ),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Container(
-                height: size.height * 0.7,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Center(
-                  child: Text('No countries found'),
-                ),
-              );
-            } else {
-              final List<dynamic> countries = snapshot.data!;
-              String searchQuery = "";
-              return StatefulBuilder(
-                builder: (BuildContext context, StateSetter setModalState) {
-                  final List<dynamic> filteredCountries =
-                      countries.where((country) {
-                    final countryName = country['name']?['common'] ?? '';
-                    return countryName
-                        .toLowerCase()
-                        .contains(searchQuery.toLowerCase());
-                  }).toList();
-
-                  return Container(
-                    height: size.height * 0.7,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 16),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: SafeArea(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Container(
-                              width: 40,
-                              height: 4,
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.primary,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'Select Phone Code',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w400),
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            decoration: InputDecoration(
-                              hintText: 'Search country...',
-                              prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            onChanged: (value) {
-                              setModalState(() {
-                                searchQuery = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: filteredCountries.length,
-                              itemBuilder: (context, index) {
-                                final country = filteredCountries[index];
-                                final countryName =
-                                    country['name']?['common'] ?? 'N/A';
-                                String countryNumber = 'N/A';
-                                try {
-                                  if (country['idd'] != null &&
-                                      country['idd']['root'] != null &&
-                                      country['idd']['suffixes'] != null &&
-                                      (country['idd']['suffixes'] as List)
-                                          .isNotEmpty) {
-                                    countryNumber =
-                                        '${country['idd']['root']}${(country['idd']['suffixes'] as List)[0]}';
-                                  }
-                                } catch (e) {
-                                  countryNumber = 'N/A';
-                                }
-                                return ListTile(
-                                  title: Text('$countryName ($countryNumber)'),
-                                  onTap: () {
-                                    Navigator.of(context).pop(countryNumber);
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              );
-            }
-          },
-        );
-      },
-    );
-  }
-
-  /// Fetches the list of countries from the API.
   Future<List<dynamic>> _fetchCountries() async {
     const url = 'https://restcountries.com/v3.1/all';
     final response = await http.get(Uri.parse(url));
@@ -571,5 +249,114 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
       throw Exception('Failed to load countries');
     }
     return jsonDecode(response.body);
+  }
+
+  Future<String?> _openCountryResidencePicker() async {
+    final countries = await _fetchCountries();
+    return _showCountryModal(countries, 'Select Country of Residence');
+  }
+
+  Future<String?> _openPhoneCodePicker() async {
+    final countries = await _fetchCountries();
+    return _showCountryModal(countries, 'Select Phone Code', isPhone: true);
+  }
+
+  Future<String?> _showCountryModal(List<dynamic> countries, String title,
+      {bool isPhone = false}) {
+    String searchQuery = "";
+    return showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            final filtered = countries.where((country) {
+              final name = country['name']?['common'] ?? '';
+              return name
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase());
+            }).toList();
+
+            return Container(
+              height: size.height * 0.7,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primary,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: 'Search country...',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setModalState(() {
+                          searchQuery = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: filtered.length,
+                        itemBuilder: (context, index) {
+                          final country = filtered[index];
+                          final countryName = country['name']?['common'] ?? 'N/A';
+                          String label = countryName;
+
+                          if (isPhone) {
+                            try {
+                              final root = country['idd']?['root'] ?? '';
+                              final suffix = (country['idd']?['suffixes'] as List?)?.first ?? '';
+                              label += ' ($root$suffix)';
+                              return ListTile(
+                                title: Text(label),
+                                onTap: () => Navigator.of(context).pop('$root$suffix'),
+                              );
+                            } catch (_) {
+                              return const SizedBox.shrink();
+                            }
+                          }
+
+                          return ListTile(
+                            title: Text(label),
+                            onTap: () => Navigator.of(context).pop(countryName),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 }

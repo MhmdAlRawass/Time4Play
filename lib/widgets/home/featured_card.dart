@@ -4,14 +4,14 @@ class FeaturedCard extends StatelessWidget {
   final String image;
   final String title;
   final String location;
-  final double rating;
+  // final double rating;
 
   const FeaturedCard({
     super.key,
     required this.image,
     required this.title,
     required this.location,
-    required this.rating,
+    // required this.rating,
   });
 
   @override
@@ -51,10 +51,10 @@ class FeaturedCard extends StatelessWidget {
                 const Icon(Icons.location_on, color: Colors.white70, size: 16),
                 const SizedBox(width: 4),
                 Text(location, style: const TextStyle(color: Colors.white70)),
-                const Spacer(),
-                const Icon(Icons.star, color: Colors.amber, size: 16),
-                Text(rating.toString(),
-                    style: const TextStyle(color: Colors.white)),
+                // const Spacer(),
+                // // const Icon(Icons.star, color: Colors.amber, size: 16),
+                // // Text(rating.toString(),
+                // //     style: const TextStyle(color: Colors.white)),
               ],
             ),
           ],

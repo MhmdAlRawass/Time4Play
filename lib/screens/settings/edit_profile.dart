@@ -176,11 +176,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     firstDate: DateTime(1900),
                     lastDate: DateTime.now(),
                   );
-                  if (picked != null) {
-                    _dobController.text =
-                        "${picked.day}/${picked.month}/${picked.year}";
-                  }
-                },
+                  _dobController.text =
+                      "${picked?.day}/${picked?.month}/${picked?.year}";
+                                },
               ),
               _buildTextField(label: "Gender", controller: _genderController),
               _buildTextField(

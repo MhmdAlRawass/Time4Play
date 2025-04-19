@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:time4play/screens/login/logging_in_screen.dart';
 import 'package:time4play/screens/main_screen.dart';
 import 'package:time4play/screens/sign_up_and_steps/sign_up.dart';
+import 'package:time4play/widgets/alert_overlay.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +24,8 @@ class _LoginScreenState extends State<LoginScreen>
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isPasswordVisible = false;
+  bool _isLoading = false;
+  final _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -60,19 +66,82 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  void _loginAction() {
+  /// 🔵 LOGIN ACTION
+  void _loginAction() async {
     if (_formKey.currentState!.validate()) {
       final email = _emailController.text.trim();
       final password = _passwordController.text.trim();
 
-      // Perform login action
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (ctx) {
-            return const MainScreen();
-          },
-        ),
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (ctx) => const MainScreen()),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        AlertOverlay.show(
+          context,
+          "Login failed. Please check your credentials.",
+          duration: const Duration(seconds: 3),
+        );
+      }
+    }
+  }
+
+  /// 🔵 GOOGLE SIGN-IN
+  void signInWithGoogle() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await GoogleSignIn().signOut();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
+
+      await _auth.signInWithCredential(credential);
+
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (ctx) => const MainScreen()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+      AlertOverlay.show(
+        context,
+        "Google Sign-In failed. Please try again.",
+        duration: const Duration(seconds: 3),
+      );
+      print("Google Sign-In Error: $e");
     }
   }
 
@@ -84,6 +153,53 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    void signInWithGoogle() async {
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+        if (googleUser == null) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
+        final GoogleSignInAuthentication googleAuth =
+            await googleUser.authentication;
+
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+
+        await _auth.signInWithCredential(credential);
+
+        if (!mounted) return;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (ctx) => const MainScreen()),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        AlertOverlay.show(
+          context,
+          "Google Sign-In failed. Please try again.",
+          duration: const Duration(seconds: 3),
+        );
+        print("Google Sign-In Error: $e");
+      }
+    }
+
+    if (_isLoading) {
+      return const LoggingInScreen();
+    }
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -228,7 +344,7 @@ class _LoginScreenState extends State<LoginScreen>
                               ),
                             ),
                             onPressed: () {
-                              // Handle Google sign in
+                              signInWithGoogle();
                             },
                             icon: const ImageIcon(
                               AssetImage('lib/assets/icons/google_logo.png'),

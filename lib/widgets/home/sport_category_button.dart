@@ -25,7 +25,7 @@ class SportCategoryButton extends StatelessWidget {
             ),
           ]),
       child: TextButton(
-        onPressed: () {},
+        onPressed: null,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

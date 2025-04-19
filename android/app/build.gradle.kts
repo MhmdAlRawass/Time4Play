@@ -3,12 +3,15 @@ plugins {
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
+    // Do not add the google-services plugin here if you plan to apply it later; many choose to apply manually.
+    // If you prefer to declare it here and it works for your setup, you can uncomment the next line:
+    // id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.time4play"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    ndkVersion =  "27.0.12077973"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -20,11 +23,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // Unique Application ID; ensure it matches your Firebase registration.
         applicationId = "com.example.time4play"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -32,8 +33,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // TODO: Set up your signing configuration if needed.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -42,3 +42,6 @@ android {
 flutter {
     source = "../.."
 }
+
+// Apply the Google Services plugin using the legacy approach:
+apply(plugin = "com.google.gms.google-services")

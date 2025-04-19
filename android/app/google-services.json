@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "953296104788",
+    "firebase_url": "https://time4play-5b336-default-rtdb.firebaseio.com",
+    "project_id": "time4play-5b336",
+    "storage_bucket": "time4play-5b336.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953296104788:android:b292fbcb689258c789ecc1",
+        "android_client_info": {
+          "package_name": "com.example.time4play"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZVHd0a3UNFKp3ID7cDT7axUQrYwePqnU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

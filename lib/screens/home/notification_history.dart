@@ -147,6 +147,7 @@ class _NotificationHistoryState extends State<NotificationHistory>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Call to satisfy @mustCallSuper
     return Scaffold(
       appBar: AppBar(
         title: const Text(

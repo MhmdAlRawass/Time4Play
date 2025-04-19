@@ -2,9 +2,20 @@
 import 'package:flutter/material.dart';
 
 class PersonalInfoPage extends StatefulWidget {
-  final Function goToNextStep;
+  const PersonalInfoPage({
+    super.key,
+    required this.goToNextStep,
+    required this.firstNameController,
+    required this.lastNameController,
+    required this.displayNameController,
+    required this.dateController,
+  });
 
-  const PersonalInfoPage({super.key, required this.goToNextStep});
+  final Function goToNextStep;
+  final TextEditingController firstNameController;
+  final TextEditingController lastNameController;
+  final TextEditingController displayNameController;
+  final TextEditingController dateController;
 
   @override
   State<PersonalInfoPage> createState() => _PersonalInfoPageState();
@@ -13,10 +24,7 @@ class PersonalInfoPage extends StatefulWidget {
 class _PersonalInfoPageState extends State<PersonalInfoPage> {
   final _formKey = GlobalKey<FormState>();
   late Size size;
-  final TextEditingController firstNameController = TextEditingController();
-  final TextEditingController lastNameController = TextEditingController();
-  final TextEditingController displayNameController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
+
   DateTime? selectedDate;
   final List<String> genderList = ['Male', 'Female', 'N/A'];
   String pickedGender = 'Male';
@@ -26,16 +34,6 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     super.initState();
     final picked = DateTime.now();
     selectedDate = picked;
-    dateController.text = "${picked.day}/${picked.month}/${picked.year}";
-  }
-
-  @override
-  void dispose() {
-    firstNameController.dispose();
-    lastNameController.dispose();
-    displayNameController.dispose();
-    dateController.dispose();
-    super.dispose();
   }
 
   void _validateForm() {
@@ -83,10 +81,10 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                             }
                             return null;
                           },
-                          controller: firstNameController,
+                          controller: widget.firstNameController,
                           onChanged: (value) {
-                            displayNameController.text =
-                                '${firstNameController.text}${lastNameController.text}';
+                            widget.displayNameController.text =
+                                '${widget.firstNameController.text}${widget.lastNameController.text}';
                           },
                           style: TextStyle(
                               color: Theme.of(context)
@@ -107,10 +105,10 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                             }
                             return null;
                           },
-                          controller: lastNameController,
+                          controller: widget.lastNameController,
                           onChanged: (value) {
-                            displayNameController.text =
-                                '${firstNameController.text}${lastNameController.text}';
+                            widget.displayNameController.text =
+                                '${widget.firstNameController.text}${widget.lastNameController.text}';
                           },
                           style: TextStyle(
                               color: Theme.of(context)
@@ -136,7 +134,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                           onTap: () {
                             _showDisplayNameBottomSheet(context);
                           },
-                          controller: displayNameController,
+                          controller: widget.displayNameController,
                           autocorrect: false,
                           readOnly: true,
                           style: TextStyle(
@@ -153,7 +151,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: TextFormField(
-                          controller: dateController,
+                          controller: widget.dateController,
                           readOnly: true,
                           style: TextStyle(
                               color: Theme.of(context)
@@ -238,7 +236,8 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
-        dateController.text = "${picked.day}/${picked.month}/${picked.year}";
+        widget.dateController.text =
+            "${picked.day}/${picked.month}/${picked.year}";
       });
     }
   }
@@ -388,7 +387,7 @@ class _PersonalInfoPageState extends State<PersonalInfoPage> {
                 SizedBox(
                   width: size.width * 0.5,
                   child: TextFormField(
-                    controller: displayNameController,
+                    controller: widget.displayNameController,
                     autofocus: true,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.secondary,

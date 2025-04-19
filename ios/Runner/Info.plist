@@ -41,6 +41,34 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<!-- Google Sign In -->
+		<key>CFBundleURLTypes</key>
+			<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+				<string>com.googleusercontent.apps.953296104788-ve3l52lvs066r3nbnieqb2bpgsb3c7rd</string>
+				</array>
+			</dict>
+			</array>
+
+		<key>NSCameraUsageDescription</key>
+		<string>This app uses the camera for profile pictures.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app needs access to your photo library.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>This app may access your microphone.</string>	
+
+		<key>LSApplicationQueriesSchemes</key>
+			<array>
+			<string>google</string>
+			<string>com.google.gppconsent</string>
+			<string>com.googleusercontent.apps.953296104788-ve3l52lvs066r3nbnieqb2bpgsb3c7rd.apps.googleusercontent.com</string>
+			</array>
+
+
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>

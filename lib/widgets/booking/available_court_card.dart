@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:time4play/widgets/gradient_border.dart';
+import 'package:time4play/models/booking.dart'; // assuming Court is in here
 
 class AvailableCourtCard extends StatelessWidget {
   const AvailableCourtCard({
     super.key,
+    required this.court,
     required this.timeSlot,
     required this.selectedDuration,
-    required this.courtName,
-    required this.isIndoor,
+    this.onTap,
+    required this.sport,
   });
 
+  final Court court;
   final DateTime timeSlot;
   final int selectedDuration;
-  final String courtName;
-  final bool isIndoor;
+  final VoidCallback? onTap;
+  final Sport sport;
 
   @override
   Widget build(BuildContext context) {
@@ -25,72 +28,74 @@ class AvailableCourtCard extends StatelessWidget {
     final endTimeFormatted = DateFormat('HH:mm').format(endTime);
 
     final textTimeFormatted = '$startTimeFormatted - $endTimeFormatted';
+    final finalPrice = sport.pricePerHour * selectedDuration / 60;
 
-    return GradientBorderContainer(
-      rightColor: Colors.redAccent,
-      leftColor: const Color.fromARGB(255, 33, 40, 243),
-      borderWidth: 2,
-      child: Container(
-        padding: EdgeInsets.all(12),
-        width: double.infinity,
-        height: 100,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  courtName,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Text(
-                  isIndoor ? 'Indoor ☂️' : 'Outdoor ☀️',
-                  style: TextStyle(
-                      // fontSize: 1,
-                      ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      textTimeFormatted,
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+    return GestureDetector(
+      onTap: onTap,
+      child: GradientBorderContainer(
+        rightColor: Colors.redAccent,
+        leftColor: const Color.fromARGB(255, 33, 40, 243),
+        borderWidth: 2,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          width: double.infinity,
+          height: 100,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // Court info
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    court.name,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
                     ),
-                    SizedBox(width: 4),
-                    Text(
-                      '($selectedDuration mins)',
-                      style: TextStyle(
-                        color: Colors.red,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Total Price',
-                  style: TextStyle(
-                    color: Colors.blueAccent,
                   ),
-                ),
-                Text(
-                  '\$ 48.00',
-                  style: TextStyle(fontSize: 30, color: Colors.white),
-                )
-              ],
-            ),
-          ],
+                  Text(
+                    court.isIndoor ? 'Indoor ☂️' : 'Outdoor ☀️',
+                    style: const TextStyle(),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        textTimeFormatted,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '($selectedDuration mins)',
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              // Price info (static for now)
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  const Text(
+                    'Total Price',
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                  Text(
+                    '\$ $finalPrice',
+                    style: const TextStyle(fontSize: 30, color: Colors.white),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

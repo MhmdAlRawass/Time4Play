@@ -64,7 +64,10 @@ class _SignUpScreenState extends State<SignUpScreen>
     if (_formKey.currentState!.validate()) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (ctx) => const CreateProfile(),
+          builder: (ctx) => CreateProfile(
+            emailController: _emailController,
+            passwordController: _passwordController,
+          ),
         ),
       );
     }

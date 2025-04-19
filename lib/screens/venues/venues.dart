@@ -1,58 +1,36 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:time4play/models/sport.dart';
+import 'package:time4play/models/booking.dart';
+import 'package:time4play/providers/venues_provider.dart';
 import 'package:time4play/screens/venues/sports.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 import 'package:time4play/widgets/venues/filter_venue_sheet.dart';
 
-class VenuesPage extends StatefulWidget {
+class VenuesPage extends ConsumerStatefulWidget {
   const VenuesPage({
     super.key,
     required this.switchScreen,
+    this.selectedSport,
   });
 
   final void Function(int) switchScreen;
+  final String? selectedSport;
 
   @override
-  State<VenuesPage> createState() => _VenuesPageState();
+  ConsumerState<VenuesPage> createState() => _VenuesPageState();
 }
 
-class _VenuesPageState extends State<VenuesPage>
+class _VenuesPageState extends ConsumerState<VenuesPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _venuesController;
   late Animation<double> _bookingsFadeAnimation;
   late Size size;
 
-  final List<Sport> sportsList = [
-    Sport(
-      name: 'Football',
-      price: 22,
-      description: 'Professional football turf',
-      imagePath: 'lib/assets/images/sports/football.png',
-    ),
-    Sport(
-      name: 'Basketball',
-      price: 21.33,
-      description: 'Indoor basketball court',
-      imagePath: 'lib/assets/images/sports/basketball.png',
-    ),
-    Sport(
-      name: 'Padel',
-      price: 15,
-      description: 'International standard padel courts',
-      imagePath: 'lib/assets/images/sports/padel.png',
-    ),
-    Sport(
-      name: 'Cricket',
-      price: 25,
-      description: 'Cricket nets and practice pitches',
-      imagePath: 'lib/assets/images/sports/cricket.png',
-    ),
-  ];
-
   List<String> selectedAreas = [];
   List<String> selectedSports = [];
+
   final List<String> availableAreas = [
     'Saida',
     'Beirut',
@@ -66,7 +44,6 @@ class _VenuesPageState extends State<VenuesPage>
     'Padel',
   ];
 
-  // Search functionality
   bool _isSearching = false;
   String _searchQuery = "";
   final TextEditingController _searchController = TextEditingController();
@@ -74,6 +51,9 @@ class _VenuesPageState extends State<VenuesPage>
   @override
   void initState() {
     super.initState();
+    if (widget.selectedSport != null && widget.selectedSport != 'All') {
+      selectedSports.add(widget.selectedSport!);
+    }
     _venuesController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 800),
@@ -90,34 +70,6 @@ class _VenuesPageState extends State<VenuesPage>
     _searchController.dispose();
     super.dispose();
   }
-
-  // Venues data with sports information
-  final List<Map<String, dynamic>> venues = [
-    {
-      "title": "4b Sporting Club",
-      "location": "Saida, Lebanon",
-      "sports": ["Football", "Basketball", "Padel"],
-      "image": "lib/assets/images/home/4b-stadium.jpg"
-    },
-    {
-      "title": "Play Arena",
-      "location": "Beirut, Lebanon",
-      "sports": ["Football", "Cricket"],
-      "image": "lib/assets/images/home/4b-stadium.jpg"
-    },
-    {
-      "title": "Decathlon Sports",
-      "location": "Bannerghatta Road, Bangalore",
-      "sports": ["Basketball", "Padel"],
-      "image": "lib/assets/images/home/4b-stadium.jpg"
-    },
-    {
-      "title": "XLR8 Indoor Sports",
-      "location": "Whitefield, Bangalore",
-      "sports": ["Cricket", "Padel"],
-      "image": "lib/assets/images/home/4b-stadium.jpg"
-    },
-  ];
 
   void _filterVenuesSheet() {
     showModalBottomSheet(
@@ -139,27 +91,29 @@ class _VenuesPageState extends State<VenuesPage>
     );
   }
 
-  List<Map<String, dynamic>> get _filteredVenues {
+  List<Company> _filterCompanies(
+    List<Company> companies,
+    Map<String, List<Sport>> sportsMap,
+  ) {
     final query = _searchQuery.toLowerCase();
-    return venues.where((venue) {
-      // Area filter
+
+    return companies.where((company) {
       if (selectedAreas.isNotEmpty &&
           !selectedAreas.any((area) =>
-              venue["location"]!.toLowerCase().contains(area.toLowerCase()))) {
+              company.address.toLowerCase().contains(area.toLowerCase()))) {
         return false;
       }
 
-      // Sport filter
-      if (selectedSports.isNotEmpty &&
-          !selectedSports.any(
-              (sport) => (venue["sports"] as List<String>).contains(sport))) {
-        return false;
+      if (selectedSports.isNotEmpty) {
+        final sports = sportsMap[company.id] ?? [];
+        if (!sports.any((sport) => selectedSports.contains(sport.name))) {
+          return false;
+        }
       }
 
-      // Search query
       if (query.isNotEmpty) {
-        final title = venue["title"]!.toLowerCase();
-        final location = venue["location"]!.toLowerCase();
+        final title = company.name.toLowerCase();
+        final location = company.address.toLowerCase();
         return title.contains(query) || location.contains(query);
       }
 
@@ -167,11 +121,26 @@ class _VenuesPageState extends State<VenuesPage>
     }).toList();
   }
 
+  Future<void> _onVenueTap(String companyId, Company company) async {
+    final sportsMap = ref.read(companySportsMapProvider).asData?.value ?? {};
+    final sports = sportsMap[companyId] ?? [];
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SportsPage(
+          sportsList: sports,
+          company: company,
+        ),
+      ),
+    );
+  }
+
   PreferredSizeWidget _buildAppBar() {
     final isIos = Platform.isIOS;
 
     return PreferredSize(
-      preferredSize: Size(double.infinity, size.height * 0.15),
+      preferredSize: Size(double.infinity, size.height * 0.151),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -262,17 +231,30 @@ class _VenuesPageState extends State<VenuesPage>
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
+    final venuesAsync = ref.watch(companyProvider);
+    final sportsMapAsync = ref.watch(companySportsMapProvider);
 
     return Scaffold(
       appBar: _buildAppBar(),
       body: SafeArea(
         child: FadeTransition(
           opacity: _bookingsFadeAnimation,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            child: _filteredVenues.isEmpty
-                ? _buildEmptyState()
-                : _buildVenuesList(),
+          child: venuesAsync.when(
+            data: (companies) {
+              return sportsMapAsync.when(
+                data: (sportsMap) {
+                  final filtered = _filterCompanies(companies, sportsMap);
+                  if (filtered.isEmpty) {
+                    return _buildEmptyState();
+                  }
+                  return _buildVenuesList(filtered);
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, _) => Center(child: Text('Error: $err')),
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, _) => Center(child: Text('Error: $error')),
           ),
         ),
       ),
@@ -298,29 +280,18 @@ class _VenuesPageState extends State<VenuesPage>
     );
   }
 
-  Widget _buildVenuesList() {
+  Widget _buildVenuesList(List<Company> venues) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        children:
-            _filteredVenues.map((venue) => _buildVenueCard(venue)).toList(),
+        children: venues.map((venue) => _buildVenueCard(venue)).toList(),
       ),
     );
   }
 
-  Widget _buildVenueCard(Map<String, dynamic> venue) {
+  Widget _buildVenueCard(Company venue) {
     return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SportsPage(
-            sportsList: sportsList
-                .where((sport) =>
-                    (venue["sports"] as List<String>).contains(sport.name))
-                .toList(),
-          ),
-        ),
-      ),
+      onTap: () => _onVenueTap(venue.id, venue),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         child: GradientBorderContainer(
@@ -335,7 +306,8 @@ class _VenuesPageState extends State<VenuesPage>
                     height: 200,
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage(venue["image"]),
+                        image:
+                            AssetImage('lib/assets/images/home/4b-stadium.jpg'),
                         fit: BoxFit.cover,
                       ),
                       borderRadius: BorderRadius.circular(12),
@@ -345,7 +317,7 @@ class _VenuesPageState extends State<VenuesPage>
                     bottom: 10,
                     left: 12,
                     child: Text(
-                      venue["title"],
+                      venue.name,
                       style: GoogleFonts.inter(
                         fontSize: 20,
                         color: Colors.white,
@@ -374,7 +346,7 @@ class _VenuesPageState extends State<VenuesPage>
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        venue["location"],
+                        venue.address,
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ),

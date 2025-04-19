@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:time4play/models/sport.dart';
+import 'package:time4play/models/booking.dart';
 import 'package:time4play/screens/venues/booking.dart';
 import 'package:time4play/widgets/sports/sport_card.dart';
 
@@ -7,9 +7,11 @@ class SportsPage extends StatefulWidget {
   const SportsPage({
     super.key,
     required this.sportsList,
+    required this.company,
   });
 
   final List<Sport> sportsList;
+  final Company company;
 
   @override
   State<SportsPage> createState() => _SportsPageState();
@@ -41,6 +43,12 @@ class _SportsPageState extends State<SportsPage>
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, String> imageUrls = {
+      'football': 'lib/assets/images/venues/football.jpg',
+      'basketball': 'lib/assets/images/venues/basketball.jpeg',
+      'padel': 'lib/assets/images/venues/padel.jpg',
+    };
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Available Sports'),
@@ -62,16 +70,24 @@ class _SportsPageState extends State<SportsPage>
                   for (var sport in widget.sportsList)
                     GestureDetector(
                       onTap: () {
+                        String imageUrl = imageUrls[sport.name.toLowerCase()] ??
+                            'lib/assets/images/venues/football.jpg';
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (context) => BookingPage(),
+                            builder: (context) => BookingPage(
+                              sport: sport,
+                              company: widget.company,
+                              imageUrl: imageUrl,
+                            ),
                           ),
                         );
                       },
                       child: SportCard(
                         name: sport.name,
-                        price: sport.price,
+                        price: sport.pricePerHour,
                         description: sport.description,
+                        imageUrl: imageUrls[sport.name.toLowerCase()] ??
+                            'lib/assets/images/venues/football.jpg',
                       ),
                     ),
                 ],

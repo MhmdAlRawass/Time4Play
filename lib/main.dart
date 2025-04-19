@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
-import 'package:time4play/providers/country_provider.dart';
-import 'package:time4play/screens/on_boarding.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:time4play/entry_point.dart';
+
+import 'package:firebase_core/firebase_core.dart';
 
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
@@ -32,7 +33,7 @@ final ThemeData darkTheme = ThemeData(
       fontSize: 16,
     ),
     bodyMedium: TextStyle(
-      color: Colors.white70,
+      color: Color.fromRGBO(255, 255, 255, 0.702),
       fontSize: 14,
     ),
   ),
@@ -48,13 +49,17 @@ final ThemeData darkTheme = ThemeData(
   ),
 );
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+        // options: DefaultFirebaseOptions.currentPlatform,
+        );
+  }
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(
-      MultiProvider(
-        providers: providers,
+      ProviderScope(
         child: const MyApp(),
       ),
     );
@@ -70,11 +75,7 @@ class MyApp extends StatelessWidget {
       title: 'Time4Play',
       debugShowCheckedModeBanner: false,
       theme: darkTheme,
-      home: const OnboardingScreen(),
+      home: const EntryPoint(),
     );
   }
 }
-
-final providers = [
-  ChangeNotifierProvider(create: (context) => CountryProvider()),
-];

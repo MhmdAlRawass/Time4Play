@@ -8,23 +8,16 @@ class SportCard extends StatelessWidget {
     required this.name,
     required this.price,
     required this.description,
+    required this.imageUrl,
   });
 
   final String name;
   final double price;
   final String description;
+  final String imageUrl;
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, String> imageUrls = {
-      'football': 'lib/assets/images/venues/football.jpg',
-      'basketball': 'lib/assets/images/venues/basketball.jpeg',
-      'padel': 'lib/assets/images/venues/padel.jpg',
-    };
-
-    String imageUrl = imageUrls[name.toLowerCase()] ??
-        'lib/assets/images/venues/football.jpg';
-
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       child: GradientBorderContainer(
@@ -35,16 +28,19 @@ class SportCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Container(
-                  width: double.infinity,
-                  height: 200,
-                  margin: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(imageUrl),
-                      fit: BoxFit.cover,
+                Hero(
+                  tag: imageUrl,
+                  child: Container(
+                    width: double.infinity,
+                    height: 200,
+                    margin: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(imageUrl),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 Positioned(

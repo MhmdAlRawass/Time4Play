@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 
 class BookingCard extends StatelessWidget {
-  final String courtName;
+  final String companyName;
   final String date;
   final String duration;
   final String price;
@@ -10,7 +10,7 @@ class BookingCard extends StatelessWidget {
 
   const BookingCard({
     super.key,
-    required this.courtName,
+    required this.companyName,
     required this.date,
     required this.duration,
     required this.price,
@@ -49,9 +49,11 @@ class BookingCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(courtName,
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold)),
+                    Text(
+                      companyName,
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
                     const SizedBox(height: 5),
                     Text(date, style: const TextStyle(color: Colors.white70)),
                     const SizedBox(height: 5),

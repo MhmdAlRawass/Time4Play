@@ -1,8 +1,16 @@
-`<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- to use wifi on physical mobiles -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="Time4Play"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- google sign in -->
+        <meta-data
+            android:name="com.google.android.gms.auth.api.credentials.CredentialsOptions"
+            android:value="request_profile" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
