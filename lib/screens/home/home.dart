@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:time4play/models/booking.dart';
+import 'package:time4play/providers/customer_provider.dart';
 import 'package:time4play/providers/venues_provider.dart';
 import 'package:time4play/screens/home/notification_history.dart';
 import 'package:time4play/screens/login/login_screen.dart';
@@ -156,7 +157,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     return Stack(
       children: [
         Scaffold(
-          drawer: _buildDrawer(context),
+          drawer: Consumer(
+            builder: (context, ref, child) {
+              final customer = ref.watch(customerProvider);
+              return customer.when(
+                data: (customer) {
+                  final twoLetterName =
+                      '${customer.firstName[0]}${customer.lastName[0]}';
+                  return _buildDrawer(
+                    context,
+                    displayName: customer.displayName,
+                    twoLetterName: twoLetterName,
+                    email: customer.email,
+                  );
+                },
+                error: (error, stackTrace) {
+                  debugPrint("❌ Error loading customer: $error");
+                  return const Drawer(
+                    child: Center(child: Text("Error loading user data")),
+                  );
+                },
+                loading: () {
+                  return const Center(child: CircularProgressIndicator());
+                },
+              );
+            },
+          ),
           body: FadeTransition(
             opacity: _fadeAnimation,
             child: CustomScrollView(
@@ -500,9 +526,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  Widget _buildDrawer(BuildContext context) {
+  Widget _buildDrawer(
+    BuildContext context, {
+    required String displayName,
+    required String twoLetterName,
+    required String email,
+  }) {
+    final iconColor = Theme.of(context).iconTheme.color;
+    final textStyle = Theme.of(context).textTheme.bodyLarge;
+
     return Drawer(
-      shape: RoundedRectangleBorder(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.horizontal(right: Radius.circular(20)),
       ),
       child: ListView(
@@ -522,7 +557,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             currentAccountPicture: CircleAvatar(
               backgroundColor: Theme.of(context).cardColor.withOpacity(0.8),
               child: Text(
-                'MR',
+                twoLetterName,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onPrimary,
                   fontWeight: FontWeight.bold,
@@ -530,69 +565,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
             accountName: Text(
-              "Mhmd",
+              displayName,
               style: Theme.of(context)
                   .textTheme
                   .titleLarge
                   ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
             ),
             accountEmail: Text(
-              "user@example.com",
+              email,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
               ),
             ),
           ),
           ListTile(
-            leading: Icon(Icons.home, color: Theme.of(context).iconTheme.color),
-            title: Text("Home"),
+            leading: Icon(Icons.home, color: iconColor),
+            title: Text("Home", style: textStyle),
             onTap: () {
               widget.switchScreen(0);
             },
           ),
           ListTile(
-            leading: Icon(Icons.calendar_today,
-                color: Theme.of(context).iconTheme.color),
-            title: Text("My Bookings"),
+            leading: Icon(Icons.calendar_today, color: iconColor),
+            title: Text("My Bookings", style: textStyle),
             onTap: () {
               widget.switchScreen(2);
             },
           ),
           ListTile(
-            leading:
-                Icon(Icons.favorite, color: Theme.of(context).iconTheme.color),
-            title: Text("Favorite Venues"),
+            leading: Icon(Icons.favorite, color: iconColor),
+            title: Text("Favorite Venues", style: textStyle),
             onTap: () {},
           ),
           ListTile(
-            leading:
-                Icon(Icons.settings, color: Theme.of(context).iconTheme.color),
-            title: Text("Settings"),
+            leading: Icon(Icons.settings, color: iconColor),
+            title: Text("Settings", style: textStyle),
             onTap: () {
               widget.switchScreen(3);
             },
           ),
           ListTile(
-            leading: Icon(Icons.help, color: Theme.of(context).iconTheme.color),
-            title: Text("Help & Support"),
+            leading: Icon(Icons.help, color: iconColor),
+            title: Text("Help & Support", style: textStyle),
             onTap: () {},
           ),
           ListTile(
-            leading:
-                Icon(Icons.article, color: Theme.of(context).iconTheme.color),
-            title: Text("Terms & Conditions"),
+            leading: Icon(Icons.article, color: iconColor),
+            title: Text("Terms & Conditions", style: textStyle),
             onTap: () {},
           ),
-          Divider(
-            color: Theme.of(context).dividerColor,
-          ),
+          Divider(color: Theme.of(context).dividerColor),
           ListTile(
-            leading:
-                Icon(Icons.logout, color: Theme.of(context).iconTheme.color),
-            title: Text("Logout"),
+            leading: Icon(Icons.logout, color: iconColor),
+            title: Text("Logout", style: textStyle),
             onTap: () async {
               _setLoadingState(true);
-
               LogoutService().logout();
               await GoogleSignIn().signOut();
               Navigator.of(context).pushReplacement(

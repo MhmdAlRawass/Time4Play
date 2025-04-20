@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 import 'package:time4play/models/booking.dart';
 import 'package:time4play/screens/venues/checkout.dart';
 import 'package:time4play/services/booking_service.dart';
@@ -495,6 +498,21 @@ class _BookingPageState extends State<BookingPage> {
   }
 }
 
+Future<void> requestLocationPermission() async {
+  var status = await Permission.location.status;
+
+  if (!status.isGranted) {
+    status = await Permission.location.request();
+    if (status.isGranted) {
+      print('Location permission granted');
+    } else if (status.isDenied) {
+      print('Permission denied');
+    } else if (status.isPermanentlyDenied) {
+      openAppSettings();
+    }
+  }
+}
+
 PreferredSizeWidget _buildAppBar(BuildContext context,
     {required String imageUrl, required Company company}) {
   final size = MediaQuery.of(context).size;
@@ -569,7 +587,11 @@ PreferredSizeWidget _buildAppBar(BuildContext context,
                       Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    await requestLocationPermission();
+                    _openGoogleMaps(
+                        context, company.latitude, company.longitude);
+                  },
                   icon: const Icon(Icons.location_on_outlined),
                 ),
               ],
@@ -579,4 +601,15 @@ PreferredSizeWidget _buildAppBar(BuildContext context,
       ],
     ),
   );
+}
+
+void _openGoogleMaps(BuildContext context, double lat, double lng) async {
+  final Uri uri = Uri.parse(
+    "https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving",
+  );
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  } else {
+    await launchUrl(uri, mode: LaunchMode.platformDefault);
+  }
 }

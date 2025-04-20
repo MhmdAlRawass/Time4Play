@@ -92,12 +92,12 @@ class Customer {
   String lastName;
   String displayName;
   String email;
-  String password;
   String phoneNumber;
   String country;
   String city;
   DateTime dateOfBirth;
   String gender;
+  String postalCode;
 
   Customer({
     required this.id,
@@ -105,13 +105,30 @@ class Customer {
     required this.lastName,
     required this.displayName,
     required this.email,
-    required this.password,
     required this.phoneNumber,
     required this.country,
     required this.city,
     required this.dateOfBirth,
     required this.gender,
+    required this.postalCode,
   });
+
+  factory Customer.fromFirestore(Map<String, dynamic> data, String id) {
+    return Customer(
+      id: id,
+      firstName: data['firstName'] ?? '',
+      lastName: data['lastName'] ?? '',
+      displayName: data['displayName'] ?? '',
+      gender: data['gender'] ?? '',
+      email: data['email'] ?? '',
+      phoneNumber: data['phoneNumber'] ?? '',
+      country: data['country'] ?? '',
+      city: data['city'] ?? '',
+      dateOfBirth:
+          (data['dateOfBirth'] as Timestamp?)?.toDate() ?? DateTime(2000),
+      postalCode: data['postalCode'] ?? '',
+    );
+  }
 }
 
 class Booking {

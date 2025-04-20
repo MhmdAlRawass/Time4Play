@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:time4play/models/booking.dart';
+import 'package:time4play/providers/customer_provider.dart';
+import 'package:time4play/services/customer_service.dart';
+import 'package:time4play/widgets/alert_overlay.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 
-class EditProfileScreen extends StatefulWidget {
+class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
 
   @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
+  ConsumerState<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   // Personal Info Controllers
   final TextEditingController _displayNameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
@@ -24,6 +29,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _streetNameController = TextEditingController();
   final TextEditingController _postalCodeController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -66,11 +73,59 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  // Save Profile Action
-  void _saveProfile() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Profile saved successfully!")),
-    );
+  DateTime _parseDate(String input) {
+    try {
+      final parts = input.split('/');
+      if (parts.length == 3) {
+        final day = int.parse(parts[0]);
+        final month = int.parse(parts[1]);
+        final year = int.parse(parts[2]);
+        return DateTime(year, month, day);
+      }
+    } catch (_) {}
+    return DateTime.now(); // fallback or handle better
+  }
+
+  void _saveProfile() async {
+    final customer = ref.watch(customerProvider).value;
+    if (customer == null) return;
+
+    try {
+      final updatedCustomer = Customer(
+        id: customer.id,
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        displayName: _displayNameController.text.trim(),
+        email: customer.email,
+        phoneNumber: _personalPhoneController.text.trim(),
+        country: _countryController.text.trim(),
+        city: _cityController.text.trim(),
+        dateOfBirth: _parseDate(_dobController.text),
+        gender: _genderController.text.trim(),
+        postalCode: _postalCodeController.text.trim(),
+      );
+
+      setState(() {
+        _isLoading = true;
+      });
+      await CustomerService.updateCustomer(updatedCustomer);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      AlertOverlay.show(
+        context,
+        'Profile updated successfully',
+        isError: false,
+      );
+    } catch (e) {
+      AlertOverlay.show(
+        context,
+        'Error occured while updating profile',
+        isError: true,
+      );
+    }
   }
 
   // Build User Image Section with a modern gradient border and edit icon.
@@ -151,14 +206,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Personal Info",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
+              // Text(
+              //   "Personal Info",
+              //   style: Theme.of(context)
+              //       .textTheme
+              //       .titleMedium
+              //       ?.copyWith(fontWeight: FontWeight.bold),
+              // ),
+              // const SizedBox(height: 8),
               _buildTextField(
                   label: "Display Name", controller: _displayNameController),
               _buildTextField(
@@ -172,13 +227,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 onTap: () async {
                   DateTime? picked = await showDatePicker(
                     context: context,
-                    initialDate: DateTime(1990, 1, 1),
-                    firstDate: DateTime(1900),
+                    initialDate:
+                        DateTime.now().subtract(const Duration(days: 365 * 18)),
+                    firstDate: _dobController.text.isNotEmpty
+                        ? DateTime.parse(_dobController.text)
+                        : DateTime.now()
+                            .subtract(const Duration(days: 365 * 18)),
                     lastDate: DateTime.now(),
                   );
                   _dobController.text =
                       "${picked?.day}/${picked?.month}/${picked?.year}";
-                                },
+                },
               ),
               _buildTextField(label: "Gender", controller: _genderController),
               _buildTextField(
@@ -210,14 +269,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Contact Info",
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
+              // Text(
+              //   "Contact Info",
+              //   style: Theme.of(context)
+              //       .textTheme
+              //       .titleMedium
+              //       ?.copyWith(fontWeight: FontWeight.bold),
+              // ),
+              // const SizedBox(height: 8),
               _buildTextField(
                   label: "Country of Residence",
                   controller: _countryController),
@@ -240,36 +299,101 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Profile"),
-        centerTitle: true,
+    final customerAsync = ref.watch(customerProvider);
+
+    return customerAsync.when(
+      loading: () => const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _saveProfile,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(50),
-        ),
-        tooltip: 'Save Profile',
-        child: const Icon(
-          Icons.check,
-          size: 30,
-        ),
+      error: (error, stack) => Scaffold(
+        body: Center(child: Text('Error loading customer: $error')),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            children: [
-              _buildUserImageSection(),
-              const SizedBox(height: 24),
-              _buildPersonalInfoSection(),
-              const SizedBox(height: 16),
-              _buildContactInfoSection(),
-              const SizedBox(height: 24),
-            ],
-          ),
-        ),
+      data: (customer) {
+        // Populate controllers once
+        if (_displayNameController.text.isEmpty) {
+          _displayNameController.text = customer.displayName;
+          _firstNameController.text = customer.firstName;
+          _lastNameController.text = customer.lastName;
+          _dobController.text =
+              "${customer.dateOfBirth.day}/${customer.dateOfBirth.month}/${customer.dateOfBirth.year}";
+          _genderController.text = customer.gender;
+          _personalPhoneController.text = customer.phoneNumber;
+
+          _countryController.text = customer.country;
+          _contactPhoneController.text = customer.phoneNumber;
+          _cityController.text = customer.city;
+          // Optionally add street/postal if added to model
+        }
+
+        return Stack(
+          children: [
+            Scaffold(
+              appBar: AppBar(
+                title: const Text("Edit Profile"),
+                centerTitle: true,
+                elevation: 0.5,
+              ),
+              floatingActionButton: FloatingActionButton.extended(
+                onPressed: _saveProfile,
+                icon: const Icon(Icons.save),
+                label: const Text("Save"),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              body: SafeArea(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).scaffoldBackgroundColor,
+                        Theme.of(context).colorScheme.surface.withOpacity(0.1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSectionHeader("Personal Info"),
+                        _buildPersonalInfoSection(),
+                        const SizedBox(height: 20),
+                        _buildSectionHeader("Contact Info"),
+                        _buildContactInfoSection(),
+                        const SizedBox(height: 80),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (_isLoading)
+              Container(
+                color: Colors.black54,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+// Cleaner section headers
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
       ),
     );
   }

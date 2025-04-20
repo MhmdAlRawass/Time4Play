@@ -2,7 +2,9 @@ import 'package:badges/badges.dart' as custom_badge;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
+import 'package:time4play/providers/user_bookings_provider.dart';
 
 import 'package:time4play/screens/bookings/upcoming_bookings.dart';
 import 'package:time4play/screens/login/login_screen.dart';
@@ -11,21 +13,22 @@ import 'package:time4play/screens/venues/venues.dart';
 import 'package:time4play/screens/home/home.dart';
 import 'package:time4play/screens/settings/settings.dart';
 
-class MainScreen extends StatefulWidget {
+class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  ConsumerState<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends ConsumerState<MainScreen> {
   int _pageIndex = 0;
   String? selectedSport;
+  final auth = FirebaseAuth.instance;
 
   final List<Widget?> _pages =
       List.filled(4, null); // 4 pages, all null initially
 
-  int bookingBadgeCount = 2; // placeholder
+  int bookingBadgeCount = 0;
 
   void switchScreens(int page, {String? selectedSport}) {
     setState(() {
@@ -51,8 +54,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _checkIfUserIsLoggedIn() async {
-    final auth = FirebaseAuth.instance;
     final user = auth.currentUser;
+
     final firestore = FirebaseFirestore.instance;
 
     if (user == null) {
@@ -115,6 +118,21 @@ class _MainScreenState extends State<MainScreen> {
       }
     }
 
+    final bookingsAsync = ref.watch(userBookingsProvider);
+    if (bookingsAsync.hasValue) {
+      final upComing = bookingsAsync.value!
+          .where(
+        (booking) => booking.startTime.isAfter(
+          DateTime.now(),
+        ),
+      )
+          .where((booking) {
+        return booking.customerId == auth.currentUser!.uid;
+      }).toList();
+      setState(() {
+        bookingBadgeCount = upComing.length;
+      });
+    }
     return Scaffold(
       body: IndexedStack(
         index: _pageIndex,

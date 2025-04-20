@@ -6,15 +6,13 @@ import 'package:time4play/entry_point.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 final ThemeData darkTheme = ThemeData(
+  fontFamily: 'WinkyRough',
   brightness: Brightness.dark,
   useMaterial3: true,
   primaryColor: const Color(0xFF0D47A1),
-  // scaffoldBackgroundColor: const Color(0xFF121212),
-  // scaffoldBackgroundColor: const Color(0xFF031024),
   scaffoldBackgroundColor: const Color(0xFF0F172A),
   cardColor: const Color(0xFF1E1E1E),
   appBarTheme: const AppBarTheme(
-    // backgroundColor: Color(0xFF0D47A1),
     backgroundColor: Color(0xFF0F172A),
   ),
   textTheme: const TextTheme(

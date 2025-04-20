@@ -68,6 +68,11 @@
 			<string>com.googleusercontent.apps.953296104788-ve3l52lvs066r3nbnieqb2bpgsb3c7rd.apps.googleusercontent.com</string>
 			</array>
 
+		<!-- google maps  -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>We need your location to open directions</string>
+
+
 
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>

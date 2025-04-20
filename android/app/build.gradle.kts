@@ -26,7 +26,7 @@ android {
         // Unique Application ID; ensure it matches your Firebase registration.
         applicationId = "com.example.time4play"
         minSdk = 23
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = flutter.targetSdkVersion 
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }

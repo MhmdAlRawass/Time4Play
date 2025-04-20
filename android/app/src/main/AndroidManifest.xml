@@ -3,6 +3,11 @@
     <!-- to use wifi on physical mobiles -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- google maps -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+
     <application
         android:label="Time4Play"
         android:name="${applicationName}"
