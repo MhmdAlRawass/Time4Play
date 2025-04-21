@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:time4play/services/notification_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:time4play/models/booking.dart';
@@ -256,6 +257,11 @@ class _BookingPageState extends State<BookingPage> {
         "Booking Confirmed.",
         isError: false,
         duration: const Duration(seconds: 3),
+      );
+
+      NotificationService().sendToSingleUser(
+        title: 'Booking Confirmed',
+        message: 'Your booking has been confirmed at ${widget.company.name}',
       );
 
       setState(() {

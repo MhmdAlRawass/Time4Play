@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:time4play/models/booking.dart';
 import 'package:time4play/services/booking_service.dart';
+import 'package:time4play/services/notification_service.dart';
 import 'package:time4play/widgets/alert_overlay.dart';
 
 class BookingInfoPage extends StatelessWidget {
@@ -35,6 +36,20 @@ class BookingInfoPage extends StatelessWidget {
         title: const Text('Booking Details'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          !isUpcoming
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: Colors.redAccent,
+                  ),
+                  onPressed: () async {
+                    await FirestoreBookingService.removeBooking(booking.id);
+                    Navigator.pop(context);
+                  },
+                )
+              : Container(),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -108,7 +123,7 @@ class BookingInfoPage extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
+              )
           ],
         ),
       ),
@@ -164,6 +179,11 @@ class BookingInfoPage extends StatelessWidget {
               AlertOverlay.show(
                 context,
                 'Booking Cancelled',
+              );
+              NotificationService().sendToSingleUser(
+                title: 'Booking Cancelled',
+                message:
+                    'Your Booking at $companyName on $startTime  has been cancelled.',
               );
             },
             child: const Text(

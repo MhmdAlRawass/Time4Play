@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:time4play/models/booking.dart';
 import 'package:time4play/providers/customer_provider.dart';
 import 'package:time4play/providers/venues_provider.dart';
@@ -248,7 +249,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   "Find a Venue",
                                   style: TextStyle(
                                     fontSize: 18,
-                                    color: Colors.white,
+                                    // color: Colors.white,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color,
                                   ),
                                 ),
                               ),
@@ -622,6 +627,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               _setLoadingState(true);
               LogoutService().logout();
               await GoogleSignIn().signOut();
+              await OneSignal.logout();
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const LoginScreen(),

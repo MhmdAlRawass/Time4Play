@@ -55,16 +55,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     TextInputType keyboardType = TextInputType.text,
     bool readOnly = false,
     VoidCallback? onTap,
+    bool isGender = false,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
-        readOnly: readOnly,
+        readOnly: isGender ? false : readOnly,
         onTap: onTap,
         decoration: InputDecoration(
             labelText: label,
+            labelStyle: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+            ),
             floatingLabelAlignment: FloatingLabelAlignment.start,
             floatingLabelBehavior: FloatingLabelBehavior.always
             // border: const OutlineInputBorder(),
@@ -202,7 +206,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         ),
         color: Theme.of(context).cardColor.withOpacity(0.4),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -239,7 +243,54 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       "${picked?.day}/${picked?.month}/${picked?.year}";
                 },
               ),
-              _buildTextField(label: "Gender", controller: _genderController),
+              _buildTextField(
+                label: "Gender",
+                controller: _genderController,
+                isGender: true,
+                readOnly: true,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return Dialog(
+                        child: Container(
+                          height: 200,
+                          // color: Theme.of(context).scaffoldBackgroundColor,
+                          child: Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ListTile(
+                                  title: const Text("Male"),
+                                  onTap: () {
+                                    _genderController.text = 'Male';
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text("Female"),
+                                  onTap: () {
+                                    _genderController.text = 'Female';
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text("N/A"),
+                                  onTap: () {
+                                    _genderController.text = 'N/A';
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
               _buildTextField(
                 label: "Phone Number",
                 controller: _personalPhoneController,

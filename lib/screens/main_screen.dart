@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 import 'package:time4play/providers/user_bookings_provider.dart';
 
@@ -12,6 +13,7 @@ import 'package:time4play/screens/sign_up_and_steps/create_profile.dart';
 import 'package:time4play/screens/venues/venues.dart';
 import 'package:time4play/screens/home/home.dart';
 import 'package:time4play/screens/settings/settings.dart';
+import 'package:time4play/services/notification_service.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -50,6 +52,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       preloadAssetImage(context);
       _checkIfUserIsLoggedIn();
+      _oneSignalLogin();
     });
   }
 
@@ -83,6 +86,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     } catch (e) {
       print('Home Creating Profile Error: $e');
     }
+  }
+
+  Future<void> _oneSignalLogin() async {
+    await OneSignal.Notifications.requestPermission(false);
+
+    final user = auth.currentUser;
+    if (user != null) {
+      await OneSignal.login(user.uid);
+    }
+
+    NotificationService().setupForegroundNotificationListener();
   }
 
   Widget _getOrCreatePage(int index) {
@@ -133,6 +147,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         bookingBadgeCount = upComing.length;
       });
     }
+
     return Scaffold(
       body: IndexedStack(
         index: _pageIndex,

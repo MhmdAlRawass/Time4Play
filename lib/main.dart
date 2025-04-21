@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time4play/entry_point.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 final ThemeData darkTheme = ThemeData(
   fontFamily: 'WinkyRough',
@@ -36,13 +37,57 @@ final ThemeData darkTheme = ThemeData(
     ),
   ),
   colorScheme: ColorScheme.dark(
-    primary: const Color(0xFF0D47A1),
-    secondary: const Color(0xFF64FFDA),
-    surface: const Color(0xFF1E1E1E),
+    primary: Color(0xFF0D47A1),
+    secondary: Color(0xFF64FFDA),
+    surface: Color(0xFF1E1E1E),
     error: Colors.redAccent,
     onPrimary: Colors.white,
     onSecondary: Colors.black,
     onSurface: Colors.white,
+    onError: Colors.white,
+  ),
+);
+
+final ThemeData lightTheme = ThemeData(
+  fontFamily: 'WinkyRough',
+  brightness: Brightness.light,
+  useMaterial3: true,
+  primaryColor: const Color(0xFF1976D2),
+  scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+  cardColor: const Color(0xFFFFFFFF),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFFFFFFFF),
+    foregroundColor: Colors.black,
+    elevation: 0,
+  ),
+  textTheme: const TextTheme(
+    headlineLarge: TextStyle(
+      color: Colors.black,
+      fontSize: 32,
+      fontWeight: FontWeight.bold,
+    ),
+    headlineSmall: TextStyle(
+      color: Colors.black,
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+    ),
+    bodyLarge: TextStyle(
+      color: Colors.black,
+      fontSize: 16,
+    ),
+    bodyMedium: TextStyle(
+      color: Color.fromRGBO(0, 0, 0, 0.65),
+      fontSize: 14,
+    ),
+  ),
+  colorScheme: ColorScheme.light(
+    primary: Color(0xFF1976D2),
+    secondary: Color(0xFF00BFA5),
+    surface: Color(0xFFFFFFFF),
+    error: Colors.red,
+    onPrimary: Colors.white,
+    onSecondary: Colors.white,
+    onSurface: Colors.black,
     onError: Colors.white,
   ),
 );
@@ -54,6 +99,14 @@ void main() async {
         // options: DefaultFirebaseOptions.currentPlatform,
         );
   }
+  OneSignal.Debug.setLogLevel(OSLogLevel.none);
+
+  OneSignal.initialize(
+    '3447e44a-de0a-4dd8-a4bd-19b8bd74ebb0',
+  );
+
+  // OneSignal.Notifications.requestPermission(false);
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
       .then((_) {
     runApp(
@@ -73,6 +126,8 @@ class MyApp extends StatelessWidget {
       title: 'Time4Play',
       debugShowCheckedModeBanner: false,
       theme: darkTheme,
+      darkTheme: darkTheme,
+      themeMode: ThemeMode.system, // Uses system preference (light/dark)
       home: const EntryPoint(),
     );
   }

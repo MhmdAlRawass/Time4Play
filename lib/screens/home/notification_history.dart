@@ -1,4 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:time4play/models/booking.dart'; // Assuming this includes Notifications model
+import 'package:time4play/services/notification_service.dart';
 
 class NotificationHistory extends StatefulWidget {
   const NotificationHistory({super.key});
@@ -11,42 +15,31 @@ class _NotificationHistoryState extends State<NotificationHistory>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
-  List<Map<String, dynamic>> notifications = [
-    {
-      'title': 'Welcome to our App!',
-      'message': 'Thanks for joining. Enjoy exploring the features.',
-      'time': '2 mins ago',
-      'icon': Icons.new_releases,
-    },
-    {
-      'title': 'Booking Confirmed',
-      'message': 'Your booking for the Soccer field is confirmed for tomorrow.',
-      'time': '1 hour ago',
-      'icon': Icons.check_circle,
-    },
-    {
-      'title': 'Special Offer',
-      'message': 'Get 30% discount on your next booking between 8PM - 11PM.',
-      'time': '3 hours ago',
-      'icon': Icons.local_offer,
-    },
-    {
-      'title': 'Reminder',
-      'message': 'Don\'t forget your upcoming booking at the Tennis Court.',
-      'time': 'Yesterday',
-      'icon': Icons.alarm,
-    },
-  ];
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  List<Notifications> notifications = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Delay inserting notifications to create a blowing up effect
+    _loadNotifications();
+  }
+
+  Future<void> _loadNotifications() async {
+    final notificationsList = await NotificationService.getNotifications()
+      ..where((notification) {
+        return notification.customerId ==
+            FirebaseAuth.instance.currentUser!.uid;
+      });
+
+    setState(() {
+      notifications = notificationsList;
+    });
+
     Future.delayed(const Duration(milliseconds: 300), () {
       for (int i = 0; i < notifications.length; i++) {
-        Future.delayed(Duration(milliseconds: i * 200), () {
+        Future.delayed(Duration(milliseconds: i * 100), () {
           _listKey.currentState?.insertItem(i);
         });
       }
@@ -62,14 +55,20 @@ class _NotificationHistoryState extends State<NotificationHistory>
           _buildNotificationItem(removedItem, animation, index),
       duration: const Duration(milliseconds: 300),
     );
+    setState(() {
+      _isLoading = true;
+    });
+
+    NotificationService.deleteNotification(removedItem.id);
 
     setState(() {
+      _isLoading = false;
       notifications.removeAt(index);
     });
   }
 
-  Widget _buildNotificationItem(Map<String, dynamic> notification,
-      Animation<double> animation, int index) {
+  Widget _buildNotificationItem(
+      Notifications notification, Animation<double> animation, int index) {
     return SlideTransition(
       position: Tween<Offset>(
         begin: const Offset(0, 1),
@@ -86,24 +85,22 @@ class _NotificationHistoryState extends State<NotificationHistory>
           borderRadius: BorderRadius.circular(12),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(12), // Ensure rounded corners
+          borderRadius: BorderRadius.circular(12),
           child: Dismissible(
-            key: Key(notification['title']),
+            key: Key(notification.id),
             onDismissed: (direction) {
               _removeNotification(index);
             },
             background: Container(
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.only(left: 20),
-              color: Colors.red
-                  .withOpacity(0.2), // Red background only for content
+              color: Colors.red.withOpacity(0.2),
               child: const Icon(Icons.delete, color: Colors.red),
             ),
             secondaryBackground: Container(
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
-              color: Colors.red
-                  .withOpacity(0.2), // Red background for the other side
+              color: Colors.red.withOpacity(0.2),
               child: const Icon(Icons.delete, color: Colors.red),
             ),
             child: ListTile(
@@ -111,25 +108,26 @@ class _NotificationHistoryState extends State<NotificationHistory>
                 backgroundColor:
                     Theme.of(context).primaryColor.withOpacity(0.2),
                 child: Icon(
-                  notification['icon'],
+                  Icons.notifications_none,
                   color: Theme.of(context).primaryColor,
                 ),
               ),
               title: Text(
-                notification['title'],
+                notification.title,
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
               subtitle: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    notification['message'],
+                    notification.body,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    notification['time'],
+                    DateFormat('yyyy-MM-dd HH:mm')
+                        .format(notification.createdAt),
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
@@ -147,7 +145,7 @@ class _NotificationHistoryState extends State<NotificationHistory>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Call to satisfy @mustCallSuper
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -156,20 +154,35 @@ class _NotificationHistoryState extends State<NotificationHistory>
         ),
         centerTitle: true,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          const SwipeHintWidget(),
-          Expanded(
-            child: AnimatedList(
-              key: _listKey,
-              padding: const EdgeInsets.all(16),
-              initialItemCount: 0, // Start empty, notifications will animate in
-              itemBuilder: (context, index, animation) {
-                return _buildNotificationItem(
-                    notifications[index], animation, index);
-              },
-            ),
+          Column(
+            children: [
+              const SwipeHintWidget(),
+              Expanded(
+                child: AnimatedList(
+                  key: _listKey,
+                  padding: const EdgeInsets.all(16),
+                  initialItemCount: 0,
+                  itemBuilder: (context, index, animation) {
+                    return _buildNotificationItem(
+                        notifications[index], animation, index);
+                  },
+                ),
+              ),
+            ],
           ),
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          if (notifications.isEmpty)
+            Center(
+              child: Text('No Notifications Yet!'),
+            )
         ],
       ),
     );

@@ -163,16 +163,18 @@ class Booking {
   }
 }
 
-class Notification {
+class Notifications {
   String id;
   String customerId;
-  String message;
+  String title;
+  String body;
   DateTime createdAt;
 
-  Notification({
+  Notifications({
     required this.id,
     required this.customerId,
-    required this.message,
+    required this.title,
+    required this.body,
     required this.createdAt,
   });
 }
