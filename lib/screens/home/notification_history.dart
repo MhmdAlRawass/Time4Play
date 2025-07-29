@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:time4play/models/booking.dart'; // Assuming this includes Notifications model
 import 'package:time4play/services/notification_service.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class NotificationHistory extends StatefulWidget {
   const NotificationHistory({super.key});
@@ -121,13 +121,12 @@ class _NotificationHistoryState extends State<NotificationHistory>
                 children: [
                   Text(
                     notification.body,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
+                    // overflow: TextOverflow.ellipsis,
+                    // maxLines: 10,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    DateFormat('yyyy-MM-dd HH:mm')
-                        .format(notification.createdAt),
+                    timeago.format(notification.createdAt),
                     style: TextStyle(
                       color: Colors.grey[600],
                       fontSize: 12,
@@ -165,8 +164,10 @@ class _NotificationHistoryState extends State<NotificationHistory>
                   padding: const EdgeInsets.all(16),
                   initialItemCount: 0,
                   itemBuilder: (context, index, animation) {
+                    final sortedNotifications = notifications
+                      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
                     return _buildNotificationItem(
-                        notifications[index], animation, index);
+                        sortedNotifications[index], animation, index);
                   },
                 ),
               ),

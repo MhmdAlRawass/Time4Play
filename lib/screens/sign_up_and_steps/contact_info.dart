@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:time4play/services/country_service.dart';
-import 'verify_page.dart';
 
 class ContactInfoPage extends StatefulWidget {
   const ContactInfoPage({
@@ -29,16 +28,10 @@ class ContactInfoPage extends StatefulWidget {
 class _ContactInfoPageState extends State<ContactInfoPage> {
   final _formKey = GlobalKey<FormState>();
   late Size size;
-
   String _selectedCallingCode = "";
   String _selectedCountryName = "";
 
-  final CountryService _countryService = CountryService();  // CountryService instance
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  final CountryService _countryService = CountryService();
 
   void _formValidate() {
     if (_formKey.currentState!.validate()) {
@@ -49,36 +42,52 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final Color primaryColor = Theme.of(context).colorScheme.primary;
+    final Color onPrimaryColor = Theme.of(context).colorScheme.onPrimary;
+    final Color cardBackground =
+        isDarkMode ? Theme.of(context).cardColor : Colors.white;
+    final Color borderColor = isDarkMode ? primaryColor : Colors.grey.shade300;
+    final Color textFieldTextColor =
+        isDarkMode ? onPrimaryColor : Colors.black87;
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
             'Contact Information',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              ),
+              color: cardBackground,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor, width: 1.5),
+              boxShadow: [
+                if (!isDarkMode)
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+              ],
             ),
             child: Form(
               key: _formKey,
               child: Column(
                 children: [
-                  // Country Picker
                   TextFormField(
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Country of Residence is required' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Country of Residence is required'
+                        : null,
                     readOnly: true,
                     controller: widget.countryController,
-                    decoration: _inputDecoration(context, 'Country of Residence *'),
+                    decoration: _inputDecoration(
+                        context, 'Country of Residence *', textFieldTextColor),
                     onTap: () async {
                       final result = await _openCountryResidencePicker();
                       if (result != null) {
@@ -90,7 +99,6 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                     },
                   ),
                   const SizedBox(height: 20),
-                  // Phone Picker + Field + Verify Button
                   Row(
                     children: [
                       GestureDetector(
@@ -103,10 +111,10 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
-                            border: Border.all(
-                                color: Theme.of(context).colorScheme.onPrimary),
+                            border: Border.all(color: borderColor),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -114,7 +122,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                                 ? _selectedCallingCode
                                 : '+Code',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
+                              color: textFieldTextColor,
                               fontSize: 14,
                             ),
                           ),
@@ -123,73 +131,43 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextFormField(
-                          validator: (value) =>
-                              value == null || value.isEmpty ? 'Number is required' : null,
+                          validator: (value) => value == null || value.isEmpty
+                              ? 'Number is required'
+                              : null,
                           controller: widget.phoneController,
                           keyboardType: TextInputType.phone,
-                          decoration: _inputDecoration(context, 'Phone Number *'),
+                          decoration: _inputDecoration(
+                              context, 'Phone Number *', textFieldTextColor),
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => VerifyPage(
-                                phoneNumber:
-                                    '$_selectedCallingCode ${widget.phoneController.text}',
-                              ),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor:
-                              Theme.of(context).colorScheme.onPrimary,
-                          overlayColor: Theme.of(context).colorScheme.primary,
-                          padding:
-                              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              width: 1,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ),
-                        child: const Text('Verify'),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // Street
                   TextFormField(
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Street Name is required' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Street Name is required'
+                        : null,
                     controller: widget.streetController,
-                    decoration: _inputDecoration(context, 'Street Name'),
-                    autocorrect: false,
-                    enableSuggestions: false,
+                    decoration: _inputDecoration(
+                        context, 'Street Name', textFieldTextColor),
                   ),
                   const SizedBox(height: 20),
-                  // Postal Code
                   TextFormField(
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'Postal Code is required, if not available, enter 0' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'Postal Code is required'
+                        : null,
                     controller: widget.postalCodeController,
-                    decoration: _inputDecoration(context, 'Postal Code'),
-                    autocorrect: false,
-                    enableSuggestions: false,
+                    decoration: _inputDecoration(
+                        context, 'Postal Code', textFieldTextColor),
                   ),
                   const SizedBox(height: 20),
-                  // City
                   TextFormField(
-                    validator: (value) =>
-                        value == null || value.isEmpty ? 'City is required' : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? 'City is required'
+                        : null,
                     controller: widget.cityController,
-                    decoration: _inputDecoration(context, 'City'),
-                    autocorrect: false,
-                    enableSuggestions: false,
+                    decoration:
+                        _inputDecoration(context, 'City', textFieldTextColor),
                   ),
                 ],
               ),
@@ -200,44 +178,33 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
             child: ElevatedButton(
               onPressed: _formValidate,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+                backgroundColor: primaryColor,
+                foregroundColor: onPrimaryColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 36, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('Next'),
+              child: const Text('Next', style: TextStyle(fontSize: 16)),
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  InputDecoration _inputDecoration(BuildContext context, String label) {
+  InputDecoration _inputDecoration(
+      BuildContext context, String label, Color textColor) {
     return InputDecoration(
       labelText: label,
-      labelStyle: TextStyle(
-        color: Theme.of(context).colorScheme.onPrimary,
-        fontSize: 14,
-      ),
+      labelStyle: TextStyle(color: textColor, fontSize: 14),
       floatingLabelBehavior: FloatingLabelBehavior.always,
-      border: UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: textColor, width: 1),
       ),
       enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(
-          width: 0.5,
-          color: Theme.of(context).colorScheme.onPrimary,
-        ),
+        borderSide: BorderSide(color: textColor.withOpacity(0.6)),
       ),
     );
   }
@@ -281,31 +248,28 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
 
             return Container(
               height: size.height * 0.7,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: SafeArea(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(4),
                       ),
                     ),
+                    Text(title,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w500)),
                     const SizedBox(height: 12),
-                    Text(
-                      title,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                    ),
-                    const SizedBox(height: 16),
                     TextFormField(
                       decoration: InputDecoration(
                         hintText: 'Search country...',
@@ -314,11 +278,8 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      onChanged: (value) {
-                        setModalState(() {
-                          searchQuery = value;
-                        });
-                      },
+                      onChanged: (value) =>
+                          setModalState(() => searchQuery = value),
                     ),
                     const SizedBox(height: 12),
                     Expanded(
@@ -326,17 +287,21 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
                         itemCount: filtered.length,
                         itemBuilder: (context, index) {
                           final country = filtered[index];
-                          final countryName = country['name']?['common'] ?? 'N/A';
-                          String label = countryName;
+                          final name = country['name']?['common'] ?? 'N/A';
+                          String label = name;
 
                           if (isPhone) {
                             try {
                               final root = country['idd']?['root'] ?? '';
-                              final suffix = (country['idd']?['suffixes'] as List?)?.first ?? '';
+                              final suffix =
+                                  (country['idd']?['suffixes'] as List?)
+                                          ?.first ??
+                                      '';
                               label += ' ($root$suffix)';
                               return ListTile(
                                 title: Text(label),
-                                onTap: () => Navigator.of(context).pop('$root$suffix'),
+                                onTap: () =>
+                                    Navigator.pop(context, '$root$suffix'),
                               );
                             } catch (_) {
                               return const SizedBox.shrink();
@@ -345,7 +310,7 @@ class _ContactInfoPageState extends State<ContactInfoPage> {
 
                           return ListTile(
                             title: Text(label),
-                            onTap: () => Navigator.of(context).pop(countryName),
+                            onTap: () => Navigator.pop(context, name),
                           );
                         },
                       ),

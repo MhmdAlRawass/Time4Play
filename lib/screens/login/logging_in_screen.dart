@@ -57,15 +57,15 @@ class _LoggingInScreenState extends State<LoggingInScreen>
     super.dispose();
   }
 
-  Widget _buildDot(int index) {
+  Widget _buildDot(int index, bool isDarkMode) {
     return SlideTransition(
       position: _animations[index],
-      child: const Text(
+      child: Text(
         '.',
         style: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.bold,
-          color: Colors.white,
+          color: isDarkMode ? Colors.white : Colors.black,
         ),
       ),
     );
@@ -73,6 +73,7 @@ class _LoggingInScreenState extends State<LoggingInScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Center(
         child: Column(
@@ -88,26 +89,26 @@ class _LoggingInScreenState extends State<LoggingInScreen>
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
+                Text(
                   'Signing In',
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
                 const SizedBox(width: 6),
-                _buildDot(0),
-                _buildDot(1),
-                _buildDot(2),
+                _buildDot(0, isDarkMode),
+                _buildDot(1, isDarkMode),
+                _buildDot(2, isDarkMode),
               ],
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'Please wait while we signing in to app.',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: isDarkMode ? Colors.grey : Colors.black54,
               ),
             ),
           ],

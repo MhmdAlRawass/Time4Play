@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:time4play/models/booking.dart';
 import 'package:time4play/providers/venues_provider.dart';
 import 'package:time4play/screens/venues/sports.dart';
+import 'package:time4play/services/php_image_service.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 import 'package:time4play/widgets/venues/filter_venue_sheet.dart';
 
@@ -27,6 +29,13 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
   late AnimationController _venuesController;
   late Animation<double> _bookingsFadeAnimation;
   late Size size;
+
+  List<String> listOfImages = [
+    'lib/assets/images/companies/company_2.jpg',
+    'lib/assets/images/companies/4b-stadium.jpg',
+    'lib/assets/images/companies/company_4.webp',
+    'lib/assets/images/companies/company_3.jpg',
+  ];
 
   List<String> selectedAreas = [];
   List<String> selectedSports = [];
@@ -136,7 +145,7 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
     );
   }
 
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(bool isDarkMode) {
     final isIos = Platform.isIOS;
 
     return PreferredSize(
@@ -154,7 +163,7 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
                     isIos
                         ? Icons.arrow_back_ios_new_outlined
                         : Icons.arrow_back,
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
                 Expanded(
@@ -163,22 +172,31 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
                     child: _isSearching
                         ? TextField(
                             controller: _searchController,
+                            cursorColor:
+                                isDarkMode ? Colors.white : Colors.black87,
+                            autocorrect: false,
+                            autofocus: true,
+                            enableSuggestions: false,
                             onChanged: (value) =>
                                 setState(() => _searchQuery = value),
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black87,
+                            ),
                             decoration: InputDecoration(
                               hintText: "Search venues",
                               hintStyle: TextStyle(
-                                color: Colors.white.withOpacity(0.7),
+                                color: isDarkMode
+                                    ? Colors.white.withOpacity(0.7)
+                                    : Colors.black.withOpacity(0.7),
                               ),
                               border: InputBorder.none,
                             ),
                           )
-                        : const Text(
+                        : Text(
                             'Available Venues',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: Colors.white,
+                              color: isDarkMode ? Colors.white : Colors.black,
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
@@ -197,7 +215,7 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
                   }),
                   icon: Icon(
                     _isSearching ? Icons.clear : Icons.search,
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                 ),
               ],
@@ -228,14 +246,33 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
     );
   }
 
+  Future<String> _fetchImage(String companyId, int index) async {
+    // companyId = 'cDbPL1gbR1KzIDFsY40K';
+    final url =
+        'http://localhost/time4play-backend/get_images.php?companyID=$companyId';
+    // 'https://time4play.atwebpages.com/get_images.php?companyID=$companyId';
+
+    try {
+      List<String> imageUrls = await PhpImageService.getImageUrls(url);
+      print('fetched images: $imageUrls');
+      return imageUrls[0];
+    } catch (e) {
+      print('Error fetching images: $e');
+    }
+    // return 'lib/assets/images/home/4b-stadium.jpg';
+    return listOfImages[index];
+  }
+
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
     final venuesAsync = ref.watch(companyProvider);
     final sportsMapAsync = ref.watch(companySportsMapProvider);
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(isDarkMode),
       body: SafeArea(
         child: FadeTransition(
           opacity: _bookingsFadeAnimation,
@@ -247,7 +284,7 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
                   if (filtered.isEmpty) {
                     return _buildEmptyState();
                   }
-                  return _buildVenuesList(filtered);
+                  return _buildVenuesList(filtered, isDarkMode);
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (err, _) => Center(child: Text('Error: $err')),
@@ -280,83 +317,115 @@ class _VenuesPageState extends ConsumerState<VenuesPage>
     );
   }
 
-  Widget _buildVenuesList(List<Company> venues) {
+  Widget _buildVenuesList(List<Company> venues, bool isDarkMode) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
-        children: venues.map((venue) => _buildVenueCard(venue)).toList(),
+        children: venues
+            .map((venue) =>
+                _buildVenueCard(venue, isDarkMode, venues.indexOf(venue)))
+            .toList(),
       ),
     );
   }
 
-  Widget _buildVenueCard(Company venue) {
-    return GestureDetector(
-      onTap: () => _onVenueTap(venue.id, venue),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        child: GradientBorderContainer(
-          leftColor: Colors.redAccent,
-          rightColor: const Color.fromARGB(255, 33, 40, 243),
-          borderWidth: 2,
-          child: Column(
-            children: [
-              Stack(
+  Widget _buildVenueCard(Company venue, bool isDarkMode, int index) {
+    return FutureBuilder<String>(
+      future: _fetchImage(venue.id, index),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        String imageUrl =
+            snapshot.data ?? 'lib/assets/images/home/4b-stadium.jpg';
+
+        print('Image Url "$imageUrl');
+
+        bool isNetworkImage = imageUrl.startsWith('http');
+
+        return GestureDetector(
+          onTap: () => _onVenueTap(venue.id, venue),
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 16),
+            child: GradientBorderContainer(
+              leftColor: Colors.redAccent,
+              rightColor: const Color.fromARGB(255, 33, 40, 243),
+              borderWidth: 2,
+              child: Column(
                 children: [
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image:
-                            AssetImage('lib/assets/images/home/4b-stadium.jpg'),
-                        fit: BoxFit.cover,
+                  Stack(
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: 200,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: isNetworkImage
+                                  ? FadeInImage.assetNetwork(
+                                      placeholder:
+                                          'lib/assets/images/placeholder.png',
+                                      image: imageUrl,
+                                      fit: BoxFit.cover,
+                                      fadeInDuration:
+                                          const Duration(milliseconds: 300),
+                                      fadeOutDuration:
+                                          const Duration(milliseconds: 300),
+                                    )
+                                  : Image.asset(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                          ),
+                        ],
                       ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+                      Positioned(
+                        bottom: 10,
+                        left: 12,
+                        child: Text(
+                          venue.name,
+                          style: GoogleFonts.inter(
+                            fontSize: 20,
+                            color: isDarkMode
+                                ? Colors.white
+                                : Color.fromARGB(255, 255, 255, 255),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  Positioned(
-                    bottom: 10,
-                    left: 12,
-                    child: Text(
-                      venue.name,
-                      style: GoogleFonts.inter(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.black38,
-                      ),
-                      icon: const Icon(Icons.star_border),
-                      onPressed: () {},
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            venue.address,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    const Icon(Icons.location_on_outlined, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        venue.address,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

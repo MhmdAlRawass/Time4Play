@@ -34,11 +34,6 @@ class BookingPage extends StatefulWidget {
 }
 
 class _BookingPageState extends State<BookingPage> {
-  final TextStyle textStyle = const TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.bold,
-  );
-
   bool _isExpanded = false;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _expandedKey = GlobalKey();
@@ -82,7 +77,7 @@ class _BookingPageState extends State<BookingPage> {
       date.day,
       closingTime.hour,
       closingTime.minute,
-    );
+    ).add(const Duration(minutes: 30));
 
     List<DateTime> slots = [];
     DateTime slot = openingDateTime;
@@ -232,7 +227,7 @@ class _BookingPageState extends State<BookingPage> {
     });
   }
 
-  void _onPressedConfirmBooking() async {
+  void _onPressedConfirmBooking(String courtId) async {
     setState(() {
       _isLoading = true;
     });
@@ -244,13 +239,14 @@ class _BookingPageState extends State<BookingPage> {
         id: docRef.id,
         customerId: FirebaseAuth.instance.currentUser!.uid,
         sportId: widget.sport.id,
-        courtId: _availableCourts.first.id,
+        courtId: courtId,
         startTime: _selectedTime!,
         duration: sessionDurationMinutes,
         createdAt: DateTime.now(),
       );
 
-      await FirestoreBookingService.createBooking(newBooking);
+      await FirestoreBookingService.createBooking(
+          newBooking, widget.company.id);
 
       AlertOverlay.show(
         context,
@@ -310,11 +306,23 @@ class _BookingPageState extends State<BookingPage> {
     final List<DateTime> timeSlots = _generateTimeSlots(dateForSlots);
     final now = DateTime.now();
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final TextStyle textStyle = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+      color: isDarkMode ? Colors.white : Colors.black,
+    );
+
     return Stack(
       children: [
         Scaffold(
-          appBar: _buildAppBar(context,
-              imageUrl: widget.imageUrl, company: widget.company),
+          appBar: _buildAppBar(
+            context,
+            imageUrl: widget.imageUrl,
+            company: widget.company,
+            isDarkMode: isDarkMode,
+          ),
           body: SafeArea(
             child: SingleChildScrollView(
               controller: _scrollController,
@@ -359,6 +367,7 @@ class _BookingPageState extends State<BookingPage> {
                               child: DateCard(
                                 date: date,
                                 selectedDate: _selectedDate ?? DateTime.now(),
+                                isDarkMode: isDarkMode,
                               ),
                             ),
                           );
@@ -410,6 +419,7 @@ class _BookingPageState extends State<BookingPage> {
                             date: timeSlot,
                             selectedTime: _selectedTime ?? DateTime.now(),
                             isBooked: isPast || _bookedSlots.contains(timeSlot),
+                            isDarkMode: isDarkMode,
                           ),
                         );
                       }).toList(),
@@ -443,8 +453,9 @@ class _BookingPageState extends State<BookingPage> {
                                   court: court,
                                   timeSlot: _selectedTime!,
                                   selectedDuration: sessionDurationMinutes,
+                                  isDarkMode: isDarkMode,
                                   onTap: () {
-                                    // You could pass selected court + time to checkout here
+                                    
                                     Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (ctx) => CheckOutScreen(
@@ -454,7 +465,7 @@ class _BookingPageState extends State<BookingPage> {
                                           sport: widget.sport,
                                           startTime: _selectedTime!,
                                           onPressedConfirm: () {
-                                            _onPressedConfirmBooking();
+                                            _onPressedConfirmBooking(court.id);
                                             setState(() {
                                               _loadBookedSlots(_selectedDate!);
                                             });
@@ -520,7 +531,9 @@ Future<void> requestLocationPermission() async {
 }
 
 PreferredSizeWidget _buildAppBar(BuildContext context,
-    {required String imageUrl, required Company company}) {
+    {required String imageUrl,
+    required Company company,
+    required bool isDarkMode}) {
   final size = MediaQuery.of(context).size;
   return PreferredSize(
     preferredSize: Size.fromHeight(size.height * 0.27),
@@ -547,7 +560,7 @@ PreferredSizeWidget _buildAppBar(BuildContext context,
               Platform.isIOS ? Icons.arrow_back_ios_new : Icons.arrow_back,
             ),
             style: IconButton.styleFrom(
-              backgroundColor: Colors.black54,
+              backgroundColor: isDarkMode ? Colors.black54 : Colors.white38,
             ),
           ),
         ),
@@ -558,7 +571,9 @@ PreferredSizeWidget _buildAppBar(BuildContext context,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
+              color: isDarkMode
+                  ? Theme.of(context).scaffoldBackgroundColor
+                  : Colors.white54,
               borderRadius: BorderRadius.circular(12).copyWith(
                 bottomLeft: Radius.zero,
                 bottomRight: Radius.zero,
@@ -572,7 +587,7 @@ PreferredSizeWidget _buildAppBar(BuildContext context,
                     Text(
                       '${company.name} - ${company.address}',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: isDarkMode ? Colors.white : Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -580,7 +595,7 @@ PreferredSizeWidget _buildAppBar(BuildContext context,
                     Text(
                       company.city,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: isDarkMode ? Colors.white : Colors.black,
                         fontSize: 12,
                       ),
                     ),

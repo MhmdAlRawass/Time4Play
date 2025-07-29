@@ -8,11 +8,13 @@ class TimeSlotCard extends StatelessWidget {
     required this.date,
     required this.selectedTime,
     this.isBooked = false,
+    required this.isDarkMode,
   });
 
   final DateTime date;
   final DateTime selectedTime;
   final bool isBooked;
+  final bool isDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -25,12 +27,22 @@ class TimeSlotCard extends StatelessWidget {
         date.hour == selectedTime.hour &&
         date.minute == selectedTime.minute;
 
-    final backgroundColor = isBooked
-        ? Colors.grey.withOpacity(0.3)
-        : Theme.of(context).colorScheme.onSecondary.withOpacity(0.2);
+    final backgroundColor = isDarkMode
+        ? isBooked
+            ? Colors.grey.withOpacity(0.3)
+            : Theme.of(context).colorScheme.onSecondary.withOpacity(0.2)
+        : isBooked
+            ? Colors.grey.withOpacity(0.3)
+            : Theme.of(context).colorScheme.primary.withOpacity(0.2);
 
     final textStyle = Theme.of(context).textTheme.bodySmall!.copyWith(
-          color: isBooked ? Colors.grey.shade500 : Colors.white,
+          color: isDarkMode
+              ? isBooked
+                  ? Colors.grey.shade500
+                  : Colors.white
+              : isBooked
+                  ? Colors.grey.shade500
+                  : Colors.black,
           decoration: isBooked ? TextDecoration.lineThrough : null,
         );
 

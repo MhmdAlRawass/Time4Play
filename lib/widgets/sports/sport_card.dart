@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 
 class SportCard extends StatelessWidget {
@@ -9,12 +8,14 @@ class SportCard extends StatelessWidget {
     required this.price,
     required this.description,
     required this.imageUrl,
+    required this.isDarkMode,
   });
 
   final String name;
   final double price;
   final String description;
   final String imageUrl;
+  final bool isDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +51,7 @@ class SportCard extends StatelessWidget {
                     width: 200,
                     child: Text(
                       name,
-                      style: GoogleFonts.inter(
+                      style: TextStyle(
                           fontSize: 20,
                           color: Colors.white,
                           fontWeight: FontWeight.w500
@@ -68,8 +69,8 @@ class SportCard extends StatelessWidget {
                       Text(
                         'Starting from',
                         textAlign: TextAlign.right,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
+                        style: TextStyle(
+                          fontSize: 14,
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
@@ -78,7 +79,7 @@ class SportCard extends StatelessWidget {
                         children: [
                           Text(
                             '\$ ${price.toStringAsFixed(2)}',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 24,
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
@@ -86,7 +87,7 @@ class SportCard extends StatelessWidget {
                           ),
                           Text(
                             ' / Hr',
-                            style: GoogleFonts.inter(
+                            style: TextStyle(
                               fontSize: 12,
                               color: Colors.white,
                               fontWeight: FontWeight.w500,
@@ -97,19 +98,19 @@ class SportCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Positioned(
-                  right: 0,
-                  child: IconButton(
-                    onPressed: () {},
-                    splashColor: Theme.of(context).colorScheme.primary,
-                    focusColor: Theme.of(context).colorScheme.primary,
-                    icon: Icon(Icons.favorite_outline),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.black38,
-                      overlayColor: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ),
+                // Positioned(
+                //   right: 0,
+                //   child: IconButton(
+                //     onPressed: () {},
+                //     splashColor: Theme.of(context).colorScheme.primary,
+                //     focusColor: Theme.of(context).colorScheme.primary,
+                //     icon: Icon(Icons.favorite_outline),
+                //     style: IconButton.styleFrom(
+                //       backgroundColor: Colors.black38,
+                //       overlayColor: Theme.of(context).colorScheme.primary,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
             Row(

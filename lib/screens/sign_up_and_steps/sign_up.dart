@@ -84,6 +84,7 @@ class _SignUpScreenState extends State<SignUpScreen>
   @override
   Widget build(BuildContext context) {
     final isIos = Theme.of(context).platform == TargetPlatform.iOS;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Stack(
@@ -124,11 +125,11 @@ class _SignUpScreenState extends State<SignUpScreen>
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 30),
-                              _buildEmailField(),
+                              _buildEmailField(isDarkMode),
                               const SizedBox(height: 16),
-                              _buildPasswordField(),
+                              _buildPasswordField(isDarkMode),
                               const SizedBox(height: 16),
-                              _buildConfirmPasswordField(),
+                              _buildConfirmPasswordField(isDarkMode),
                               const SizedBox(height: 24),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
@@ -174,7 +175,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     );
   }
 
-  Widget _buildEmailField() {
+  Widget _buildEmailField(bool isDarkMode) {
     return TextFormField(
       controller: _emailController,
       validator: (value) {
@@ -185,14 +186,14 @@ class _SignUpScreenState extends State<SignUpScreen>
         return null;
       },
       decoration: _inputDecoration(
-        hint: "Email",
-        prefixIcon: Icons.email_outlined,
-      ),
+          hint: "Email",
+          prefixIcon: Icons.email_outlined,
+          isDarkMode: isDarkMode),
       keyboardType: TextInputType.emailAddress,
     );
   }
 
-  Widget _buildPasswordField() {
+  Widget _buildPasswordField(bool isDarkMode) {
     return TextFormField(
       controller: _passwordController,
       validator: (value) {
@@ -202,10 +203,13 @@ class _SignUpScreenState extends State<SignUpScreen>
       },
       decoration: _inputDecoration(
         hint: "Password",
+        isDarkMode: isDarkMode,
         prefixIcon: Icons.lock_outline,
         suffixIcon: IconButton(
           icon: Icon(
-              _isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+            _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            color: isDarkMode ? null : Theme.of(context).colorScheme.secondary,
+          ),
           onPressed: _togglePasswordVisibility,
         ),
       ),
@@ -213,7 +217,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     );
   }
 
-  Widget _buildConfirmPasswordField() {
+  Widget _buildConfirmPasswordField(bool isDarkMode) {
     return TextFormField(
       controller: _confirmPasswordController,
       validator: (value) {
@@ -225,11 +229,13 @@ class _SignUpScreenState extends State<SignUpScreen>
       },
       decoration: _inputDecoration(
         hint: "Confirm Password",
+        isDarkMode: isDarkMode,
         prefixIcon: Icons.lock_outline,
         suffixIcon: IconButton(
-          icon: Icon(_isConfirmPasswordVisible
-              ? Icons.visibility
-              : Icons.visibility_off),
+          icon: Icon(
+            _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+            color: isDarkMode ? null : Theme.of(context).colorScheme.secondary,
+          ),
           onPressed: _toggleConfirmPasswordVisibility,
         ),
       ),
@@ -241,6 +247,7 @@ class _SignUpScreenState extends State<SignUpScreen>
     required String hint,
     required IconData prefixIcon,
     Widget? suffixIcon,
+    required bool isDarkMode,
   }) {
     return InputDecoration(
       hintText: hint,
@@ -248,7 +255,7 @@ class _SignUpScreenState extends State<SignUpScreen>
           Icon(prefixIcon, color: Theme.of(context).colorScheme.secondary),
       suffixIcon: suffixIcon,
       filled: true,
-      fillColor: const Color(0xFF1E1E1E),
+      fillColor: isDarkMode ? const Color(0xFF1E1E1E) : null,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
         borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),

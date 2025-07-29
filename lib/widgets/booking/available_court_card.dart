@@ -11,6 +11,7 @@ class AvailableCourtCard extends StatelessWidget {
     required this.selectedDuration,
     this.onTap,
     required this.sport,
+    required this.isDarkMode,
   });
 
   final Court court;
@@ -18,6 +19,7 @@ class AvailableCourtCard extends StatelessWidget {
   final int selectedDuration;
   final VoidCallback? onTap;
   final Sport sport;
+  final bool isDarkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +52,8 @@ class AvailableCourtCard extends StatelessWidget {
                 children: [
                   Text(
                     court.name,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -63,7 +65,9 @@ class AvailableCourtCard extends StatelessWidget {
                     children: [
                       Text(
                         textTimeFormatted,
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -90,7 +94,10 @@ class AvailableCourtCard extends StatelessWidget {
                   ),
                   Text(
                     '\$ $finalPrice',
-                    style: const TextStyle(fontSize: 30, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 30,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   )
                 ],
               ),

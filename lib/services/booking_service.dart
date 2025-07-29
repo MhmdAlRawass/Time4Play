@@ -46,7 +46,7 @@ class FirestoreBookingService {
   }
 
   /// Create a new booking
-  static Future<void> createBooking(Booking booking) async {
+  static Future<void> createBooking(Booking booking, String companyId) async {
     await FirebaseFirestore.instance.collection('booking').doc(booking.id).set({
       'id': booking.id,
       'customerId': booking.customerId,
@@ -55,6 +55,7 @@ class FirestoreBookingService {
       'startTime': Timestamp.fromDate(booking.startTime),
       'duration': booking.duration,
       'createdAt': FieldValue.serverTimestamp(),
+      'companyId': companyId,
     });
   }
 

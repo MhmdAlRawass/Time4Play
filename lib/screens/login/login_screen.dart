@@ -100,6 +100,42 @@ class _LoginScreenState extends State<LoginScreen>
     }
   }
 
+  /// 🔵 RESET PASSWORD
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+
+    if (email.isEmpty || !EmailValidator.validate(email)) {
+      AlertOverlay.show(context, "Please enter a valid email address");
+      return;
+    }
+
+    try {
+      final methods = await _auth.fetchSignInMethodsForEmail(email);
+      print("Sign-in methods for $email: $methods");
+      if (methods.isEmpty) {
+        AlertOverlay.show(context, "Email not found. Please sign up first.");
+        return;
+      }
+    } catch (e) {
+      AlertOverlay.show(context, "Error checking email: ${e.toString()}");
+      return;
+    }
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      await _auth.sendPasswordResetEmail(email: email);
+      setState(() {
+        _isLoading = false;
+      });
+
+      AlertOverlay.show(context, "Password reset email sent!", isError: false);
+    } catch (e) {
+      AlertOverlay.show(context, "Error sending reset email: ${e.toString()}");
+    }
+  }
+
   /// 🔵 GOOGLE SIGN-IN
   void signInWithGoogle() async {
     setState(() {
@@ -200,11 +236,21 @@ class _LoginScreenState extends State<LoginScreen>
       return const LoggingInScreen();
     }
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF121212), Color(0xFF0D47A1)],
+            colors: isDarkMode
+                ? [
+                    Color(0xFF121212),
+                    Color(0xFF0D47A1),
+                  ]
+                : [
+                    Color(0xFFBBDEFB),
+                    Theme.of(context).colorScheme.primary,
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -252,7 +298,8 @@ class _LoginScreenState extends State<LoginScreen>
                                   color:
                                       Theme.of(context).colorScheme.secondary),
                               filled: true,
-                              fillColor: const Color(0xFF1E1E1E),
+                              fillColor:
+                                  isDarkMode ? const Color(0xFF1E1E1E) : null,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
@@ -298,7 +345,8 @@ class _LoginScreenState extends State<LoginScreen>
                                 onPressed: _togglePasswordVisibility,
                               ),
                               filled: true,
-                              fillColor: const Color(0xFF1E1E1E),
+                              fillColor:
+                                  isDarkMode ? const Color(0xFF1E1E1E) : null,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
@@ -333,7 +381,38 @@ class _LoginScreenState extends State<LoginScreen>
                                       Theme.of(context).colorScheme.onPrimary),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          // const SizedBox(
+                          //   height: 10,
+                          // ),
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.end,
+                          //   children: [
+                          //     GestureDetector(
+                          //       onTap: () {
+                          //         _resetPassword();
+                          //       },
+                          //       child: Text(
+                          //         'Forget Password?',
+                          //         style: TextStyle(
+                          //           color:
+                          //               Theme.of(context).colorScheme.secondary,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          const SizedBox(height: 10),
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Text("OR"),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
                           ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,

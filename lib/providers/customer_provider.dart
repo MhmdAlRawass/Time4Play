@@ -3,9 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:time4play/models/booking.dart';
 import 'package:time4play/services/customer_service.dart';
 
+final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
+  return FirebaseAuth.instance;
+});
+
+final authStateProvider = StreamProvider<User?>((ref) {
+  final auth = ref.watch(firebaseAuthProvider);
+  return auth.authStateChanges();
+});
+
 final customerIdProvider = Provider<String?>((ref) {
-  // Replace this with your actual logic to get the user ID
-  return FirebaseAuth.instance.currentUser?.uid;
+  final user = ref.watch(authStateProvider).asData?.value;
+  return user?.uid;
 });
 
 

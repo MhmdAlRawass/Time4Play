@@ -1,10 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:time4play/screens/home/notification_history.dart';
+import 'package:time4play/screens/settings/change_password.dart';
 import 'package:time4play/screens/settings/edit_profile.dart';
 import 'package:time4play/screens/settings/how_to_use.dart';
+import 'package:time4play/screens/settings/location_permission.dart';
+import 'package:time4play/screens/settings/notification_permission.dart';
+import 'package:time4play/services/theme_service.dart';
 import 'package:time4play/widgets/gradient_border.dart';
 
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({
     super.key,
     required this.switchScreen,
@@ -13,10 +19,10 @@ class SettingsPage extends StatefulWidget {
   final void Function(int) switchScreen;
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
+  ConsumerState<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsPageState extends State<SettingsPage>
+class _SettingsPageState extends ConsumerState<SettingsPage>
     with SingleTickerProviderStateMixin {
   late AnimationController _settingsController;
   late Animation<double> _settingsFadeAnimation;
@@ -43,12 +49,14 @@ class _SettingsPageState extends State<SettingsPage>
   @override
   Widget build(BuildContext context) {
     final isIos = Platform.isIOS;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeMode = ref.watch(themeNotifierProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Settings',
           style: TextStyle(
-            color: Colors.white,
+            color: isDarkMode ? Colors.white : Colors.black,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -62,6 +70,23 @@ class _SettingsPageState extends State<SettingsPage>
         ),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Theme.of(context).scaffoldBackgroundColor,
+        actions: [
+          IconButton(
+            onPressed: () {
+              final notifier = ref.read(themeNotifierProvider.notifier);
+              if (themeMode == ThemeMode.light) {
+                notifier.toggleTheme(true); 
+              } else {
+                notifier.toggleTheme(false);
+              }
+            },
+            icon: Icon(
+              isDarkMode ? Icons.dark_mode_outlined : Icons.light_mode_outlined,
+            ),
+            tooltip: 'Toggle Theme',
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ],
       ),
       body: SafeArea(
         child: FadeTransition(
@@ -82,25 +107,54 @@ class _SettingsPageState extends State<SettingsPage>
                       );
                     },
                   ),
-                  _buildSettingsTile(Icons.lock, "Change Password", () {}),
-                  _buildSettingsTile(
-                      Icons.credit_card, "Payment Methods", () {}),
+                  _buildSettingsTile(Icons.lock, "Change Password", () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => ChangePasswordPage(),
+                      ),
+                    );
+                  }),
+                  // _buildSettingsTile(
+                  //     Icons.credit_card, "Payment Methods", () {}),
                 ]),
                 _buildSettingsSection("Notifications", [
                   _buildSettingsTile(
-                      Icons.notifications, "Booking Alerts", () {}),
-                  _buildSettingsTile(
-                      Icons.campaign, "Promotional Offers", () {}),
+                    Icons.campaign,
+                    'Notification Permissions',
+                    () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (ctx) =>
+                              const NotificationPermissionScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  _buildSettingsTile(Icons.notifications, "Booking Alerts", () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => const NotificationHistory(),
+                      ),
+                    );
+                  }),
+                  // _buildSettingsTile(
+                  //     Icons.campaign, "Promotional Offers", () {}),
                 ]),
-                _buildSettingsSection("Preferences", [
-                  _buildSettingsTile(Icons.sports, "Preferred Sport", () {}),
-                  _buildSettingsTile(Icons.favorite, "Favorite Venues", () {}),
-                  _buildSettingsTile(Icons.access_time, "Time Format", () {}),
-                ]),
+                // _buildSettingsSection("Preferences", [
+                //   _buildSettingsTile(Icons.sports, "Preferred Sport", () {}),
+                //   _buildSettingsTile(Icons.favorite, "Favorite Venues", () {}),
+                //   _buildSettingsTile(Icons.access_time, "Time Format", () {}),
+                // ]),
                 _buildSettingsSection("Privacy & Security", [
-                  _buildSettingsTile(
-                      Icons.location_on, "Location Permissions", () {}),
-                  _buildSettingsTile(Icons.history, "Activity History", () {}),
+                  _buildSettingsTile(Icons.location_on, "Location Permissions",
+                      () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (ctx) {
+                        return LocationPermissionScreen();
+                      }),
+                    );
+                  }),
+                  // _buildSettingsTile(Icons.history, "Activity History", () {}),
                 ]),
                 _buildSettingsSection("Support & Legal", [
                   _buildSettingsTile(Icons.help, "How It Works", () {
@@ -131,13 +185,13 @@ class _SettingsPageState extends State<SettingsPage>
         leftColor: Colors.grey.withOpacity(0.5),
         rightColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
         borderWidth: 1,
-        child: Card(
-          elevation: 2,
+        child: Container(
+          // elevation: 2,
           // margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide.none,
-          ),
+          // shape: RoundedRectangleBorder(
+          //   borderRadius: BorderRadius.circular(12),
+          //   side: BorderSide.none,
+          // ),
           color: Theme.of(context).cardColor.withOpacity(0.4),
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

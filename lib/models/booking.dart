@@ -18,6 +18,7 @@ class Company {
     required this.city,
     required this.latitude,
     required this.longitude,
+
     // this.sports = [],
   });
 

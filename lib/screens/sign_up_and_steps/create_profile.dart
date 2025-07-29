@@ -36,6 +36,7 @@ class _CreateProfileState extends State<CreateProfile> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController displayNameController = TextEditingController();
   final TextEditingController dateController = TextEditingController();
+  final TextEditingController genderController = TextEditingController();
 
   // Second Page
   final TextEditingController countryController = TextEditingController();
@@ -43,6 +44,8 @@ class _CreateProfileState extends State<CreateProfile> {
   final TextEditingController streetController = TextEditingController();
   final TextEditingController postalCodeController = TextEditingController();
   final TextEditingController cityController = TextEditingController();
+
+  DateTime? dateOfBirth;
 
   bool _isLoading = false;
 
@@ -73,13 +76,15 @@ class _CreateProfileState extends State<CreateProfile> {
           'firstName': firstNameController.text,
           'lastName': lastNameController.text,
           'displayName': displayNameController.text,
-          'dateOfBirth': dateController.text,
+          'dateOfBirth':
+              Timestamp.fromDate(dateOfBirth ?? DateTime.now()), // Timestamp
           'country': countryController.text,
           'phoneNumber': phoneController.text,
           'streetAddress': streetController.text,
           'postalCode': postalCodeController.text,
           'city': cityController.text,
           'email': widget.emailController!.text,
+          'gender' : genderController.text,
         });
       } else {
         // Regular email/password sign-up
@@ -92,7 +97,8 @@ class _CreateProfileState extends State<CreateProfile> {
           'firstName': firstNameController.text,
           'lastName': lastNameController.text,
           'displayName': displayNameController.text,
-          'dateOfBirth': dateController.text,
+          'dateOfBirth':
+              Timestamp.fromDate(dateOfBirth ?? DateTime.now()), // Timestamp
           'country': countryController.text,
           'phoneNumber': phoneController.text,
           'streetAddress': streetController.text,
@@ -123,7 +129,8 @@ class _CreateProfileState extends State<CreateProfile> {
   void initState() {
     super.initState();
     final picked = DateTime.now();
-    dateController.text = "${picked.day}/${picked.month}/${picked.year}";
+    dateController.text = "Select Date";
+    // dateController.text = "${picked.day}/${picked.month}/${picked.year}";
   }
 
   @override
@@ -143,7 +150,6 @@ class _CreateProfileState extends State<CreateProfile> {
   @override
   Widget build(BuildContext context) {
     size = MediaQuery.of(context).size;
-
     List<Widget> steps = [
       PersonalInfoPage(
         goToNextStep: goToNextStep,
@@ -151,6 +157,12 @@ class _CreateProfileState extends State<CreateProfile> {
         lastNameController: lastNameController,
         displayNameController: displayNameController,
         dateController: dateController,
+        onDateSelected: (date) {
+          setState(() {
+            dateOfBirth = date;
+          });
+        },
+        genderController: genderController,
       ),
       ContactInfoPage(
         goToNextStep: goToNextStepAndSignUp,

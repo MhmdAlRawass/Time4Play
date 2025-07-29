@@ -57,6 +57,7 @@ class _FilterVenuesSheetState extends State<FilterVenuesSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
+    final bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       height: size.height * 0.65,
@@ -89,9 +90,9 @@ class _FilterVenuesSheetState extends State<FilterVenuesSheet> {
               ],
             ),
             const Divider(),
-        
+
             // Areas Section
-            _buildSectionHeader('Select Area'),
+            _buildSectionHeader('Select Area', isDarkMode),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -102,14 +103,15 @@ class _FilterVenuesSheetState extends State<FilterVenuesSheet> {
                   value: area,
                   isSelected: isSelected,
                   onTap: () => _handleAreaSelection(area, isSelected),
+                  isDarkMode: isDarkMode,
                 );
               }).toList(),
             ),
-        
+
             const SizedBox(height: 24),
-        
+
             // Sports Section
-            _buildSectionHeader('Select Sport'),
+            _buildSectionHeader('Select Sport', isDarkMode),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -120,12 +122,13 @@ class _FilterVenuesSheetState extends State<FilterVenuesSheet> {
                   value: sport,
                   isSelected: isSelected,
                   onTap: () => _handleSportSelection(sport, isSelected),
+                  isDarkMode: isDarkMode,
                 );
               }).toList(),
             ),
-        
+
             const Spacer(),
-        
+
             // Apply Button
             SizedBox(
               width: double.infinity,
@@ -153,13 +156,13 @@ class _FilterVenuesSheetState extends State<FilterVenuesSheet> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, bool isDarkMode) {
     return Text(
       title,
       style: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: Colors.blueGrey[300],
+        color: isDarkMode ? Colors.blueGrey[300] : Colors.blueGrey[800],
       ),
     );
   }

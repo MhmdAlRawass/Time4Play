@@ -17,7 +17,7 @@ dependencies:
   email_validator: ^3.0.0
   google_fonts: ^6.2.1
   intl: ^0.20.2
-  flutter_launcher_icons: ^0.14.3 # Added for app icons
+  flutter_launcher_icons: ^0.14.3 
   badges: ^3.1.2
   visibility_detector: ^0.4.0+2
   flutter_native_splash: ^2.4.5
@@ -31,6 +31,8 @@ dependencies:
   url_launcher: ^6.3.1
   permission_handler: ^12.0.0+1
   onesignal_flutter: ^5.3.0
+  shimmer: ^3.0.0
+  timeago: ^3.2.2
 
 dev_dependencies:
   flutter_test:
@@ -40,7 +42,7 @@ dev_dependencies:
 flutter_icons:
   android: true
   ios: true
-  image_path: "lib/assets/icons/logo.jpeg" # Your main app icon
+  image_path: "lib/assets/icons/logo2.jpg" # Your main app icon
   adaptive_icon_background: "#0F172A" # Background for adaptive icon (Android)
   # adaptive_icon_foreground: "lib/assets/icons/app_icon_foreground.png"  # Optional foreground
 
@@ -49,11 +51,12 @@ flutter:
 
   assets:
     - lib/assets/
+    - lib/assets/icons/
     - lib/assets/images/
+    - lib/assets/animations/
     - lib/assets/images/home/
     - lib/assets/images/venues/
-    - lib/assets/icons/
-    - lib/assets/animations/
+    - lib/assets/images/companies/
 
   fonts:
     - family: WinkyRough
@@ -63,14 +66,14 @@ flutter:
           style: italic
 
 flutter_native_splash:
-  color: "#0F172A"
-  image: lib/assets/icons/logo.jpeg
-  branding: lib/assets/icons/logo.jpeg
-  color_dark: "#0F172A"
-  image_dark: lib/assets/icons/logo.jpeg
+  color: "#FFFFFF" # White for light mode
+  color_dark: "#0F172A" # Dark mode color
+  image: lib/assets/icons/logo2.jpg
+  image_dark: lib/assets/icons/logo2.jpg
+  android: true
+  ios: true
   android_12:
-    image: lib/assets/icons/logo.jpeg
-    icon_background_color: "#0F172A"
-    image_dark: lib/assets/icons/logo.jpeg
-    icon_background_color_dark: "#0F172A"
+    image: lib/assets/icons/logo2.jpg
+    icon_background_color: "#FFFFFF" # White for light mode
+    icon_background_color_dark: "#0F172A" # Dark mode color
   web: false

@@ -4,12 +4,14 @@ class AreaCard extends StatelessWidget {
   final String value;
   final bool isSelected;
   final VoidCallback onTap;
+  final bool isDarkMode;
 
   const AreaCard({
     super.key,
     required this.value,
     this.isSelected = false,
     required this.onTap,
+    required this.isDarkMode,
   });
 
   @override
@@ -36,7 +38,13 @@ class AreaCard extends StatelessWidget {
         child: Text(
           value,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey[600],
+            color: isDarkMode
+                ? isSelected
+                    ? Colors.white
+                    : Colors.grey[600]
+                : isSelected
+                    ? Colors.black
+                    : Colors.grey[600],
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),

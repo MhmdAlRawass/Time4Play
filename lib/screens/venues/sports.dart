@@ -49,11 +49,13 @@ class _SportsPageState extends State<SportsPage>
       'padel': 'lib/assets/images/venues/padel.jpg',
     };
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Available Sports'),
         titleTextStyle: TextStyle(
-          color: Colors.white,
+          color: isDarkMode ? Colors.white : Colors.black,
           fontSize: 22,
           fontWeight: FontWeight.bold,
         ),
@@ -88,6 +90,7 @@ class _SportsPageState extends State<SportsPage>
                         description: sport.description,
                         imageUrl: imageUrls[sport.name.toLowerCase()] ??
                             'lib/assets/images/venues/football.jpg',
+                        isDarkMode: isDarkMode,
                       ),
                     ),
                 ],

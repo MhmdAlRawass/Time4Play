@@ -107,6 +107,7 @@ class _FinishedProfileState extends State<FinishedProfile>
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -134,12 +135,12 @@ class _FinishedProfileState extends State<FinishedProfile>
                   position: _titleSlide,
                   child: FadeTransition(
                     opacity: _titleFade,
-                    child: const Text(
+                    child: Text(
                       "Profile Created!",
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
@@ -150,12 +151,12 @@ class _FinishedProfileState extends State<FinishedProfile>
                   position: _subtitleSlide,
                   child: FadeTransition(
                     opacity: _subtitleFade,
-                    child: const Text(
+                    child: Text(
                       "Your profile is set up and ready to use. Let's get started!",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
-                        color: Colors.white70,
+                        color: isDarkMode ? Colors.white : Colors.black,
                       ),
                     ),
                   ),
@@ -176,13 +177,17 @@ class _FinishedProfileState extends State<FinishedProfile>
                         backgroundColor: Colors.blueAccent,
                       ),
                       onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/home');
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (ctx) => MainScreen(),
+                          ),
+                        );
                       },
-                      child: const Text(
+                      child: Text(
                         "Go to Home",
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.white,
+                          color: isDarkMode ? Colors.white : Colors.black,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

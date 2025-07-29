@@ -104,7 +104,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
     switch (index) {
       case 0:
-        _pages[0] = HomeScreen(switchScreen: switchScreens);
+        _pages[0] = HomeScreen(
+          switchScreen: switchScreens,
+          pageIndex: _pageIndex,
+        );
         break;
       case 1:
         _pages[1] = VenuesPage(
@@ -148,61 +151,71 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       });
     }
 
-    return Scaffold(
-      body: IndexedStack(
-        index: _pageIndex,
-        children: List.generate(
-          _pages.length,
-          (i) => _pages[i] ?? const SizedBox(),
-        ),
-      ),
-      bottomNavigationBar: SalomonBottomBar(
-        currentIndex: _pageIndex,
-        curve: Curves.linearToEaseOut,
-        margin: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
-        onTap: (index) {
+    return PopScope(
+      canPop: _pageIndex == 0,
+      onPopInvokedWithResult: (didPop, T) {
+        if (!didPop && _pageIndex != 0) {
           setState(() {
-            _pageIndex = index;
+            _pageIndex = 0;
           });
-        },
-        items: [
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.home_outlined),
-            title: const Text('Home'),
+        }
+      },
+      child: Scaffold(
+        body: IndexedStack(
+          index: _pageIndex,
+          children: List.generate(
+            _pages.length,
+            (i) => _pages[i] ?? const SizedBox(),
           ),
-          SalomonBottomBarItem(
-            icon: const ImageIcon(
-              AssetImage('lib/assets/icons/venue.png'),
-              size: 24,
+        ),
+        bottomNavigationBar: SalomonBottomBar(
+          currentIndex: _pageIndex,
+          curve: Curves.linearToEaseOut,
+          margin: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+          onTap: (index) {
+            setState(() {
+              _pageIndex = index;
+            });
+          },
+          items: [
+            SalomonBottomBarItem(
+              icon: const Icon(Icons.home_outlined),
+              title: const Text('Home'),
             ),
-            title: const Text('Venues'),
-          ),
-          SalomonBottomBarItem(
-            icon: custom_badge.Badge(
-              showBadge: bookingBadgeCount > 0,
-              badgeStyle: custom_badge.BadgeStyle(
-                badgeColor: Theme.of(context).colorScheme.primary,
-              ),
-              badgeContent: Text(
-                '$bookingBadgeCount',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                ),
-              ),
-              position: custom_badge.BadgePosition.topEnd(top: -10, end: -10),
-              child: const ImageIcon(
-                AssetImage('lib/assets/icons/playing.png'),
+            SalomonBottomBarItem(
+              icon: const ImageIcon(
+                AssetImage('lib/assets/icons/venue.png'),
                 size: 24,
               ),
+              title: const Text('Venues'),
             ),
-            title: const Text('Bookings'),
-          ),
-          SalomonBottomBarItem(
-            icon: const Icon(Icons.settings_outlined),
-            title: const Text('Settings'),
-          ),
-        ],
+            SalomonBottomBarItem(
+              icon: custom_badge.Badge(
+                showBadge: bookingBadgeCount > 0,
+                badgeStyle: custom_badge.BadgeStyle(
+                  badgeColor: Theme.of(context).colorScheme.primary,
+                ),
+                badgeContent: Text(
+                  '$bookingBadgeCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                  ),
+                ),
+                position: custom_badge.BadgePosition.topEnd(top: -10, end: -10),
+                child: const ImageIcon(
+                  AssetImage('lib/assets/icons/playing.png'),
+                  size: 24,
+                ),
+              ),
+              title: const Text('Bookings'),
+            ),
+            SalomonBottomBarItem(
+              icon: const Icon(Icons.settings_outlined),
+              title: const Text('Settings'),
+            ),
+          ],
+        ),
       ),
     );
   }

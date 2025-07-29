@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:time4play/models/booking.dart';
 
@@ -31,12 +30,16 @@ class CheckOutScreen extends StatelessWidget {
     final finalPrice = sport.pricePerHour * duration / 60;
     final matchDate = DateFormat('EEEE, d MMMM').format(startTime);
     final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
           'Checkout',
-          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
         centerTitle: true,
       ),
@@ -61,7 +64,7 @@ class CheckOutScreen extends StatelessWidget {
                     children: [
                       Text(
                         'Your Booking',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary,
@@ -72,13 +75,16 @@ class CheckOutScreen extends StatelessWidget {
                       // Date & Time
                       Row(
                         children: [
-                          const Icon(Icons.calendar_today_rounded,
-                              color: Colors.white70, size: 20),
+                          Icon(
+                            Icons.calendar_today_rounded,
+                            color: isDarkMode ? Colors.white70 : Colors.black54,
+                            size: 20,
+                          ),
                           const SizedBox(width: 10),
                           Text(
                             matchDate,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
                               fontSize: 16,
                             ),
                           ),
@@ -87,13 +93,15 @@ class CheckOutScreen extends StatelessWidget {
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.access_time_filled,
-                              color: Colors.white70, size: 20),
+                          Icon(Icons.access_time_filled,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black54,
+                              size: 20),
                           const SizedBox(width: 10),
                           Text(
                             timeRange,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
                               fontSize: 16,
                             ),
                           ),
@@ -105,14 +113,16 @@ class CheckOutScreen extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.location_on,
-                              color: Colors.white70, size: 20),
+                          Icon(Icons.location_on,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black54,
+                              size: 20),
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
                               '${company.name}, ${company.address}',
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: isDarkMode ? Colors.white : Colors.black,
                                 fontSize: 16,
                               ),
                             ),
@@ -124,13 +134,15 @@ class CheckOutScreen extends StatelessWidget {
                       // Court & Sport
                       Row(
                         children: [
-                          const Icon(Icons.sports_tennis,
-                              color: Colors.white70, size: 20),
+                          Icon(Icons.sports_tennis,
+                              color:
+                                  isDarkMode ? Colors.white70 : Colors.black54,
+                              size: 20),
                           const SizedBox(width: 10),
                           Text(
                             '${sport.name} at $courtName',
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
                               fontSize: 16,
                             ),
                           ),
@@ -140,21 +152,21 @@ class CheckOutScreen extends StatelessWidget {
 
                       // Price
                       Divider(
-                        color: Colors.white24,
+                        color: isDarkMode ? Colors.white24 : Colors.black26,
                         thickness: 1,
                       ),
                       const SizedBox(height: 16),
                       Text(
                         'Total',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 16,
-                          color: Colors.white60,
+                          color: isDarkMode ? Colors.white60 : Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         '\$${finalPrice.toStringAsFixed(2)}',
-                        style: GoogleFonts.inter(
+                        style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.primary,
@@ -210,7 +222,7 @@ class CheckOutScreen extends StatelessWidget {
                       color: Colors.white),
                   label: Text(
                     'Confirm Booking',
-                    style: GoogleFonts.inter(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,

@@ -16,14 +16,24 @@ class ReviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDarkMode = brightness == Brightness.dark;
+
     return Container(
       width: 250,
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1D283A),
-        borderRadius: BorderRadius.circular(15),
-      ),
+      decoration: isDarkMode
+          ? BoxDecoration(
+              color: const Color(0xFF1D283A),
+              borderRadius: BorderRadius.circular(15),
+            )
+          : BoxDecoration(
+              border: Border.all(
+                color: Theme.of(context).primaryColor.withOpacity(0.4),
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,20 +46,40 @@ class ReviewCard extends StatelessWidget {
                     const Icon(Icons.person),
               ),
               const SizedBox(width: 8),
-              Text(user,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
+              Text(
+                user,
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Colors.white
+                      : Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 10),
-          Text(comment, style: const TextStyle(color: Colors.white70)),
+          Text(
+            comment,
+            style: TextStyle(
+              color: isDarkMode
+                  ? Colors.white70
+                  : Theme.of(context).primaryColor.withOpacity(0.6),
+            ),
+            maxLines: 3,
+          ),
           const SizedBox(height: 10),
           Row(
             children: [
               const Icon(Icons.star, color: Colors.amber, size: 16),
               const SizedBox(width: 4),
-              Text(rating.toString(),
-                  style: const TextStyle(color: Colors.white)),
+              Text(
+                rating.toString(),
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Colors.white
+                      : Theme.of(context).primaryColor,
+                ),
+              ),
             ],
           )
         ],

@@ -87,7 +87,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         return DateTime(year, month, day);
       }
     } catch (_) {}
-    return DateTime.now(); // fallback or handle better
+    return DateTime.now();
   }
 
   void _saveProfile() async {
@@ -199,11 +199,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       leftColor: Colors.grey.withOpacity(0.5),
       rightColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
       borderWidth: 1,
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+      child: Container(
+        // elevation: 2,
+        // shape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(12),
+        // ),
         color: Theme.of(context).cardColor.withOpacity(0.4),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -253,7 +253,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     context: context,
                     builder: (context) {
                       return Dialog(
-                        child: Container(
+                        child: SizedBox(
                           height: 200,
                           // color: Theme.of(context).scaffoldBackgroundColor,
                           child: Center(
@@ -291,11 +291,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   );
                 },
               ),
-              _buildTextField(
-                label: "Phone Number",
-                controller: _personalPhoneController,
-                keyboardType: TextInputType.phone,
-              ),
             ],
           ),
         ),
@@ -309,11 +304,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       leftColor: Colors.grey.withOpacity(0.5),
       rightColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
       borderWidth: 1,
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+      child: Container(
+        // elevation: 2,
+        // shape: RoundedRectangleBorder(
+        //   borderRadius: BorderRadius.circular(12),
+        // ),
         color: Theme.of(context).cardColor.withOpacity(0.4),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),

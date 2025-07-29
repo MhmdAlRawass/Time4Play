@@ -1,15 +1,27 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:intl/intl.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shimmer/shimmer.dart';
+
 import 'package:time4play/models/booking.dart';
 import 'package:time4play/providers/customer_provider.dart';
+import 'package:time4play/providers/user_bookings_provider.dart';
 import 'package:time4play/providers/venues_provider.dart';
+import 'package:time4play/screens/bookings/booking_info.dart';
 import 'package:time4play/screens/home/notification_history.dart';
 import 'package:time4play/screens/login/login_screen.dart';
 import 'package:time4play/screens/venues/sports.dart';
+import 'package:time4play/services/company_service.dart';
+import 'package:time4play/services/court_service.dart';
 import 'package:time4play/services/logout_service.dart';
-import '../../widgets/home/section_header.dart';
+import 'package:time4play/services/php_image_service.dart';
+import 'package:time4play/services/sport_service.dart';
+import 'package:time4play/widgets/gradient_border.dart';
+import 'package:time4play/widgets/home/section_header.dart';
+import 'package:time4play/widgets/upcoming_bookings/booking_card.dart';
 import '../../widgets/home/sport_category_button.dart';
 import '../../widgets/home/featured_card.dart';
 import '../../widgets/home/promotion_card.dart';
@@ -19,9 +31,11 @@ class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({
     super.key,
     required this.switchScreen,
+    required this.pageIndex,
   });
 
   final void Function(int, {String? selectedSport}) switchScreen;
+  final int pageIndex;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -37,6 +51,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   late Animation<Offset> _reviewsSlideAnimation;
   late Animation<double> _premiumScaleAnimation;
   bool _isLoading = false;
+
+  List<String> listOfImages = [
+    'lib/assets/images/companies/company_2.jpg',
+    'lib/assets/images/companies/4b-stadium.jpg',
+    'lib/assets/images/companies/company_4.webp',
+    'lib/assets/images/companies/company_3.jpg',
+  ];
 
   final List<String> availableSports = [
     'Football',
@@ -60,12 +81,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       duration: const Duration(milliseconds: 1500),
     );
 
-    // Fade animation for the entire page
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    // Slide animations for each section
     _sportsSlideAnimation = Tween<Offset>(
       begin: const Offset(-1, 0),
       end: Offset.zero,
@@ -98,7 +117,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       curve: const Interval(0.6, 1.0, curve: Curves.easeOut),
     ));
 
-    // Scale animation for the premium CTA
     _premiumScaleAnimation =
         Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(
       parent: _controller,
@@ -120,7 +138,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       builder: (context) => AlertDialog(
         title: const Text("Special Offer"),
         content:
-            const Text("30% discount applies to bookings between 8PM-11PM"),
+            const Text("You can get a free coaching session with this offer!"),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -131,9 +149,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
-  void _showPremiumOptions() {
-    // Implement premium subscription logic here
-  }
+  void _showPremiumOptions() {}
 
   Future<void> _onVenueTap(String companyId, Company company) async {
     final sportsMap = ref.read(companySportsMapProvider).asData?.value ?? {};
@@ -150,10 +166,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  Future<String> _fetchImage(String companyId, int index) async {
+    // companyId = 'cDbPL1gbR1KzIDFsY40K';
+    final url =
+        'http://localhost/time4play-backend/get_images.php?companyID=$companyId';
+    // 'https://time4play.atwebpages.com/get_images.php?companyID=$companyId';
+
+    try {
+      List<String> imageUrls = await PhpImageService.getImageUrls(url);
+      print('fetched images: $imageUrls');
+      return imageUrls[0];
+    } catch (e) {
+      print('Error fetching images: $e');
+    }
+    // return 'lib/assets/images/home/4b-stadium.jpg';
+    return listOfImages[index];
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final venuesAsync = ref.watch(companyProvider);
+    final userBookingsAsync = ref.watch(userBookingsProvider);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Stack(
       children: [
@@ -170,10 +205,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     displayName: customer.displayName,
                     twoLetterName: twoLetterName,
                     email: customer.email,
+                    isDarkMode: isDarkMode,
                   );
                 },
                 error: (error, stackTrace) {
                   debugPrint("❌ Error loading customer: $error");
+
                   return const Drawer(
                     child: Center(child: Text("Error loading user data")),
                   );
@@ -197,7 +234,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                       fit: StackFit.expand,
                       children: [
                         Image.asset(
-                          'lib/assets/images/home/hero.jpg',
+                          isDarkMode
+                              ? 'lib/assets/images/home/hero.jpg'
+                              : 'lib/assets/images/home/hero_light.png',
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               const Placeholder(),
@@ -314,11 +353,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     itemCount: availableSports.length,
                                     itemBuilder: (ctx, index) {
                                       return GestureDetector(
-                                        behavior: HitTestBehavior
-                                            .opaque, // <- important
+                                        behavior: HitTestBehavior.opaque,
                                         onTap: () {
-                                          print(availableSports[
-                                              index]); // Debug check
                                           widget.switchScreen(
                                             1,
                                             selectedSport:
@@ -336,6 +372,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ),
                         ),
                         const SizedBox(height: 24),
+                        // Upcoming Matches
+                        SlideTransition(
+                          position: _sportsSlideAnimation,
+                          child: Column(
+                            children: [
+                              SectionHeader(
+                                title: "Upcoming Matches",
+                                onSeeAll: () {
+                                  widget.switchScreen(2);
+                                },
+                              ),
+                              Consumer(
+                                builder: (context, ref, child) {
+                                  final userBookings =
+                                      ref.watch(userBookingsProvider);
+                                  return userBookings.when(
+                                    data: (bookings) {
+                                      final isUpcoming = true;
+                                      final sortedBookings = bookings
+                                        ..sort(
+                                          (a, b) => a.startTime
+                                              .compareTo(b.startTime),
+                                        );
+                                      final filteredBookings = sortedBookings
+                                          .where(
+                                            (booking) =>
+                                                booking.startTime
+                                                    .isAfter(DateTime.now()) &&
+                                                booking.customerId ==
+                                                    FirebaseAuth.instance
+                                                        .currentUser?.uid,
+                                          )
+                                          .toList();
+
+                                      if (filteredBookings.isEmpty) {
+                                        return _buildBookingCard(
+                                            booking: null,
+                                            isUpcoming: isUpcoming,
+                                            isDarkMode: isDarkMode);
+                                      }
+
+                                      return _buildBookingCard(
+                                        booking: filteredBookings.first,
+                                        isUpcoming: isUpcoming,
+                                        isDarkMode: isDarkMode,
+                                      );
+                                    },
+                                    loading: () =>
+                                        _buildLoadingCard(isDarkMode),
+                                    error: (error, stackTrace) =>
+                                        Text('Error: $error'),
+                                  );
+                                },
+                              )
+                            ],
+                          ),
+                        ),
 
                         // Recommended Venues
                         SlideTransition(
@@ -353,20 +446,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                     return ListView.builder(
                                       scrollDirection: Axis.horizontal,
                                       itemCount:
-                                          data.length < 4 ? data.length : 4,
+                                          data.length < 3 ? data.length : 3,
                                       itemBuilder: (context, index) {
                                         final venue = data[index];
-                                        return GestureDetector(
-                                          onTap: () {
-                                            _onVenueTap(venue.id, venue);
+                                        return FutureBuilder<String>(
+                                          future: _fetchImage(venue.id, index),
+                                          builder: (context, snapshot) {
+                                            final imageUrl = snapshot.data ??
+                                                'lib/assets/images/home/4b-stadium.jpg';
+                                            return GestureDetector(
+                                              onTap: () {
+                                                _onVenueTap(venue.id, venue);
+                                              },
+                                              child: FeaturedCard(
+                                                image: imageUrl,
+                                                title: venue.name,
+                                                location: venue.address,
+                                              ),
+                                            );
                                           },
-                                          child: FeaturedCard(
-                                            image:
-                                                'lib/assets/images/home/4b-stadium.jpg',
-                                            title: venue.name,
-                                            location: venue.address,
-                                            // rating: venue.rating,
-                                          ),
                                         );
                                       },
                                     );
@@ -461,10 +559,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                         const SizedBox(height: 24),
 
                         // Premium CTA
-                        ScaleTransition(
-                          scale: _premiumScaleAnimation,
-                          child: _buildPremiumCta(),
-                        ),
+                        // ScaleTransition(
+                        //   scale: _premiumScaleAnimation,
+                        //   child: _buildPremiumCta(),
+                        // ),
                       ],
                     ),
                   ),
@@ -536,6 +634,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     required String displayName,
     required String twoLetterName,
     required String email,
+    required bool isDarkMode,
   }) {
     final iconColor = Theme.of(context).iconTheme.color;
     final textStyle = Theme.of(context).textTheme.bodyLarge;
@@ -564,7 +663,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: Text(
                 twoLetterName,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.onPrimary,
+                  color: isDarkMode
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -597,11 +698,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               widget.switchScreen(2);
             },
           ),
-          ListTile(
-            leading: Icon(Icons.favorite, color: iconColor),
-            title: Text("Favorite Venues", style: textStyle),
-            onTap: () {},
-          ),
+          // ListTile(
+          //   leading: Icon(Icons.favorite, color: iconColor),
+          //   title: Text("Favorite Venues", style: textStyle),
+          //   onTap: () {},
+          // ),
           ListTile(
             leading: Icon(Icons.settings, color: iconColor),
             title: Text("Settings", style: textStyle),
@@ -624,16 +725,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             leading: Icon(Icons.logout, color: iconColor),
             title: Text("Logout", style: textStyle),
             onTap: () async {
-              _setLoadingState(true);
-              LogoutService().logout();
-              await GoogleSignIn().signOut();
-              await OneSignal.logout();
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const LoginScreen(),
+              final shouldLogout = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text("Confirm Logout"),
+                  content: const Text("Are you sure you want to logout?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text("Logout"),
+                    ),
+                  ],
                 ),
               );
-              _setLoadingState(false);
+
+              if (shouldLogout == true) {
+                _setLoadingState(true);
+                LogoutService().logout();
+                await GoogleSignIn().signOut();
+                await OneSignal.logout();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (context) => const LoginScreen(),
+                  ),
+                );
+                _setLoadingState(false);
+              }
             },
           ),
         ],
@@ -651,5 +772,181 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     setState(() {
       _isLoading = isLoading;
     });
+  }
+
+  Future<Sport> _getSportById(String sportId) async {
+    return await FirestoreSportService.getSportById(sportId) ??
+        Sport(
+          id: '',
+          name: '',
+          description: '',
+          pricePerHour: 0,
+          companyId: '',
+        );
+  }
+
+  Future<Company> _getCompanyById(String companyId) async {
+    return await FirestoreCompanyService.getCompanyById(companyId);
+  }
+
+  Widget _buildBookingCard({
+    required Booking? booking,
+    required bool isUpcoming,
+    required bool isDarkMode,
+  }) {
+    if (booking == null) {
+      return GradientBorderContainer(
+        leftColor: Colors.grey.withOpacity(0.5),
+        rightColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+        borderWidth: 2,
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          height: 100,
+          decoration: BoxDecoration(
+            color: isDarkMode
+                ? const Color(0xFF1D283A)
+                : Theme.of(context).colorScheme.primary.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Center(
+            child: Text(
+              "No upcoming bookings",
+              style: TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: FutureBuilder<Sport>(
+        future: _getSportById(booking.sportId),
+        builder: (context, sportSnapshot) {
+          if (!sportSnapshot.hasData) {
+            return _buildLoadingCard(isDarkMode);
+          }
+          final sport = sportSnapshot.data!;
+          return FutureBuilder<Company>(
+            future: _getCompanyById(sport.companyId),
+            builder: (context, companySnapshot) {
+              if (!companySnapshot.hasData) {
+                return _buildLoadingCard(isDarkMode);
+              }
+              final company = companySnapshot.data!;
+              return GestureDetector(
+                onTap: () async {
+                  final court = await FirestoreCourtService.getCourtById(
+                          booking.courtId) ??
+                      Court(
+                        id: '',
+                        name: '',
+                        companyId: '',
+                        sportId: '',
+                        isIndoor: false,
+                      );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BookingInfoPage(
+                        courtName: court.name,
+                        startTime: booking.startTime.toString(),
+                        duration: "${booking.duration} minutes",
+                        price:
+                            "\$${sport.pricePerHour * booking.duration / 60}",
+                        image: sport.name.toLowerCase() == 'basketball'
+                            ? 'lib/assets/images/venues/basketball.jpeg'
+                            : 'lib/assets/images/venues/${sport.name.toLowerCase()}.jpg',
+                        isUpcoming: isUpcoming,
+                        companyName: company.name,
+                        booking: booking,
+                      ),
+                    ),
+                  );
+                },
+                child: BookingCard(
+                  companyName: company.name,
+                  date:
+                      DateFormat('yyyy-MM-dd h:mm a').format(booking.startTime),
+                  duration: "${booking.duration} minutes",
+                  price: "\$${sport.pricePerHour * booking.duration / 60}",
+                  image: sport.name.toLowerCase() == 'basketball'
+                      ? 'lib/assets/images/venues/basketball.jpeg'
+                      : 'lib/assets/images/venues/${sport.name.toLowerCase()}.jpg',
+                  isDarkMode: isDarkMode,
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLoadingCard(bool isDarkMode) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Shimmer.fromColors(
+        baseColor: isDarkMode ? Colors.grey[800]! : Colors.grey[300]!,
+        highlightColor: isDarkMode ? Colors.grey[700]! : Colors.grey[100]!,
+        child: GradientBorderContainer(
+          leftColor: Colors.grey.withOpacity(0.5),
+          rightColor: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+          borderWidth: 2,
+          borderRadius: BorderRadius.circular(15),
+          child: Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: isDarkMode ? const Color(0xFF1D283A) : Colors.white,
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Row(
+              children: [
+                // Simulated image placeholder
+                Container(
+                  width: 100,
+                  height: 80,
+                  margin: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                // Simulated text placeholders
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 15,
+                        width: 150,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        height: 12,
+                        width: 100,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 5),
+                      Container(
+                        height: 12,
+                        width: 60,
+                        color: Colors.grey[400],
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

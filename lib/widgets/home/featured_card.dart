@@ -16,13 +16,15 @@ class FeaturedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isNetworkImage =
+        image.startsWith('http') || image.startsWith('https');
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         image: DecorationImage(
-          image: AssetImage(image),
+          image: !isNetworkImage ? AssetImage(image) : NetworkImage(image),
           fit: BoxFit.cover,
         ),
       ),

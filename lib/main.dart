@@ -5,6 +5,7 @@ import 'package:time4play/entry_point.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:time4play/services/theme_service.dart';
 
 final ThemeData darkTheme = ThemeData(
   fontFamily: 'WinkyRough',
@@ -52,11 +53,11 @@ final ThemeData lightTheme = ThemeData(
   fontFamily: 'WinkyRough',
   brightness: Brightness.light,
   useMaterial3: true,
-  primaryColor: const Color(0xFF1976D2),
-  scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+  primaryColor: const Color(0xFF2196F3),
+  scaffoldBackgroundColor: const Color(0xFFFAFAFA),
   cardColor: const Color(0xFFFFFFFF),
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFFFFFFFF),
+    backgroundColor: Color(0xFFFAFAFA),
     foregroundColor: Colors.black,
     elevation: 0,
   ),
@@ -67,22 +68,22 @@ final ThemeData lightTheme = ThemeData(
       fontWeight: FontWeight.bold,
     ),
     headlineSmall: TextStyle(
-      color: Colors.black,
+      color: Colors.black87,
       fontSize: 20,
       fontWeight: FontWeight.bold,
     ),
     bodyLarge: TextStyle(
-      color: Colors.black,
+      color: Colors.black87,
       fontSize: 16,
     ),
     bodyMedium: TextStyle(
-      color: Color.fromRGBO(0, 0, 0, 0.65),
+      color: Color.fromRGBO(0, 0, 0, 0.6),
       fontSize: 14,
     ),
   ),
   colorScheme: ColorScheme.light(
-    primary: Color(0xFF1976D2),
-    secondary: Color(0xFF00BFA5),
+    primary: Color(0xFF0D47A1),
+    secondary: Color.fromARGB(201, 33, 149, 243),
     surface: Color(0xFFFFFFFF),
     error: Colors.red,
     onPrimary: Colors.white,
@@ -117,17 +118,18 @@ void main() async {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeNotifierProvider);
     return MaterialApp(
       title: 'Time4Play',
       debugShowCheckedModeBanner: false,
-      theme: darkTheme,
+      theme: lightTheme,
       darkTheme: darkTheme,
-      themeMode: ThemeMode.system, // Uses system preference (light/dark)
+      themeMode: themeMode,
       home: const EntryPoint(),
     );
   }

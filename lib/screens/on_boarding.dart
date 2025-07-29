@@ -37,11 +37,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF121212), Color(0xFF0D47A1)],
+            colors: isDarkMode
+                ? [
+                    Color(0xFF121212),
+                    Color(0xFF0D47A1),
+                  ]
+                : [
+                    Color(0xFFBBDEFB),
+                    Color(0xFF64B5F6),
+                  ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -176,12 +185,13 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Column(
         children: [
           // Lottie Animation
-            Expanded(
+          Expanded(
             flex: 3,
             child: Lottie.asset(
               lottiePath,
@@ -199,10 +209,10 @@ class OnboardingPage extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: isDarkMode ? Colors.white : Colors.black,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -211,7 +221,7 @@ class OnboardingPage extends StatelessWidget {
                   description,
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey.shade600,
+                    color: isDarkMode ? Colors.grey.shade600 : Colors.black54,
                   ),
                   textAlign: TextAlign.center,
                 ),
